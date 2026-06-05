@@ -257,8 +257,8 @@
             let isShooting = false;
             let score = 0;
             let comboCount = 0;
-            let mouseX = canvas.width / 2;
-            let mouseY = SHOOTER_Y - 100;
+            let mouseX = 0;
+            let mouseY = 0;
             let animationId = null;
             let gameRunning = true;
 
@@ -270,6 +270,9 @@
 
             const SHOOTER_X = canvas.width / 2;
             const SHOOTER_Y = canvas.height - SHOOTER_Y_OFFSET;
+            // Initialize mouse position to point upward
+            mouseX = SHOOTER_X;
+            mouseY = SHOOTER_Y - 100;
             const GRID_BOTTOM = canvas.height - SHOOTER_Y_OFFSET - 30;
 
             function getGridX(col, row) {
