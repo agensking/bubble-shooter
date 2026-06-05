@@ -1,0 +1,5 @@
+# Bubble Shooter Game
+
+*.log
+.DS_Store
+Thumbs.db
