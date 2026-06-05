@@ -267,7 +267,9 @@
             position: absolute;
             pointer-events: none;
             z-index: 200;
-            font-size: 80px;
+            width: 80px;
+            height: 80px;
+            background: url('pikachu.png') center/contain no-repeat;
             animation: pikachuAcross 3s ease-in-out forwards;
             filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
         }
@@ -326,7 +328,9 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 300;
-            font-size: 150px;
+            width: 180px;
+            height: 180px;
+            background: url('pikachu.png') center/contain no-repeat;
             animation: pikachuVictory 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1)) drop-shadow(0 0 80px rgba(255, 200, 0, 0.6));
             pointer-events: none;
@@ -711,7 +715,6 @@
                 const cy = containerRect.height * 0.35;
                 const el = document.createElement('div');
                 el.className = 'pikachu-fly';
-                el.textContent = '⚡🐱⚡';
                 el.style.cssText = `
                     top: ${cy}px;
                     left: -100px;
@@ -747,7 +750,6 @@
                 // 大皮卡丘
                 const bigPika = document.createElement('div');
                 bigPika.className = 'big-pikachu';
-                bigPika.textContent = '🐱⚡';
                 gameContainer.appendChild(bigPika);
                 setTimeout(() => bigPika.remove(), 5000);
 
