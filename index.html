@@ -258,6 +258,7 @@
             let score = 0;
             let comboCount = 0;
             let mouseX = canvas.width / 2;
+            let mouseY = SHOOTER_Y - 100;
             let animationId = null;
             let gameRunning = true;
 
@@ -587,8 +588,9 @@
                 const dx = targetX - SHOOTER_X;
                 const dy = targetY - SHOOTER_Y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
-                const speed = 12;
+                if (dist < 1) return;
 
+                const speed = 12;
                 bubbleVX = (dx / dist) * speed;
                 bubbleVY = (dy / dist) * speed;
                 bubbleX = SHOOTER_X;
@@ -715,50 +717,114 @@
                 drawBubble(x, y, shooterBubble.color, true);
             }
 
+            function simulateShot(angle) {
+                // Returns {x, y, hit} — where the bubble would land if shot at this angle
+                const speed = 12;
+                let sx = SHOOTER_X;
+                let sy = SHOOTER_Y;
+                let vx = Math.cos(angle) * speed;
+                let vy = Math.sin(angle) * speed;
+
+                for (let step = 0; step < 200; step++) {
+                    sx += vx;
+                    sy += vy;
+
+                    // Wall bounce
+                    if (sx - BUBBLE_RADIUS <= 0) {
+                        sx = BUBBLE_RADIUS;
+                        vx = Math.abs(vx);
+                    } else if (sx + BUBBLE_RADIUS >= canvas.width) {
+                        sx = canvas.width - BUBBLE_RADIUS;
+                        vx = -Math.abs(vx);
+                    }
+
+                    // Hit ceiling
+                    if (sy - BUBBLE_RADIUS <= GRID_OFFSET_Y) {
+                        return { x: sx, y: GRID_OFFSET_Y + BUBBLE_RADIUS, hit: 'ceiling' };
+                    }
+
+                    // Check collision with existing bubbles
+                    for (let row = 0; row < ROWS; row++) {
+                        const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
+                        for (let col = 0; col < colsInRow; col++) {
+                            if (grid[row][col] && grid[row][col].active) {
+                                const gx = getGridX(col, row);
+                                const gy = getGridY(row);
+                                const dx = sx - gx;
+                                const dy = sy - gy;
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+                                if (dist < BUBBLE_DIAMETER) {
+                                    // Snap to nearest grid position adjacent to this bubble
+                                    let bestCol = col, bestRow = row;
+                                    let bestDist = Infinity;
+                                    for (let nr = Math.max(0, row - 1); nr <= Math.min(ROWS - 1, row + 1); nr++) {
+                                        const ncols = (nr % 2 === 0) ? COLS : COLS - 1;
+                                        for (let nc = Math.max(0, col - 1); nc <= Math.min(ncols - 1, col + 1); nc++) {
+                                            if (isPositionValid(nc, nr) && (!grid[nr][nc] || !grid[nr][nc].active)) {
+                                                const nx = getGridX(nc, nr);
+                                                const ny = getGridY(nr);
+                                                const nd = Math.hypot(sx - nx, sy - ny);
+                                                if (nd < bestDist && nd < BUBBLE_DIAMETER * 1.5) {
+                                                    bestDist = nd;
+                                                    bestCol = nc;
+                                                    bestRow = nr;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (bestDist < Infinity) {
+                                        return { x: getGridX(bestCol, bestRow), y: getGridY(bestRow), hit: 'bubble' };
+                                    }
+                                    return { x: sx, y: sy, hit: 'bubble' };
+                                }
+                            }
+                        }
+                    }
+                }
+                // Fell off screen
+                return { x: sx, y: Math.min(sy, canvas.height), hit: 'miss' };
+            }
+
             function drawAimLine() {
                 if (isShooting || !gameRunning || !shooterBubble) return;
 
                 const dx = mouseX - SHOOTER_X;
-                const dy = -(canvas.height - SHOOTER_Y);
-                const angle = Math.atan2(dy, dx);
+                const dy = mouseY - SHOOTER_Y;
+                if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
 
-                // Draw dotted aim line
+                const angle = Math.atan2(dy, dx);
+                const target = simulateShot(angle);
+
+                // Draw solid aim line from shooter to target
                 ctx.save();
-                ctx.setLineDash([4, 6]);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
                 ctx.lineWidth = 2;
+                ctx.setLineDash([6, 3]);
                 ctx.beginPath();
                 ctx.moveTo(SHOOTER_X, SHOOTER_Y - BUBBLE_RADIUS);
-                const lineLength = 120;
-                ctx.lineTo(
-                    SHOOTER_X + Math.cos(angle) * lineLength,
-                    SHOOTER_Y - BUBBLE_RADIUS + Math.sin(angle) * lineLength
-                );
+                ctx.lineTo(target.x, target.y);
                 ctx.stroke();
                 ctx.setLineDash([]);
-                ctx.restore();
 
-                // Draw bounce preview on walls
-                const previewSteps = 60;
-                let px = SHOOTER_X;
-                let py = SHOOTER_Y;
-                let vx = Math.cos(angle) * 1;
-                let vy = Math.sin(angle) * 1;
+                // Draw bright landing dot at predicted position
+                const dotColor = shooterBubble ? shooterBubble.color : COLORS[0];
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = dotColor;
+                ctx.lineWidth = 2;
+                ctx.stroke();
 
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-                for (let i = 0; i < previewSteps; i++) {
-                    px += vx * 3;
-                    py += vy * 3;
-                    if (px - BUBBLE_RADIUS <= 0 || px + BUBBLE_RADIUS >= canvas.width) {
-                        vx = -vx;
-                    }
-                    if (i % 4 === 0) {
-                        ctx.beginPath();
-                        ctx.arc(px, py, 2, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                    if (py < GRID_OFFSET_Y) break;
+                // Draw small matching-color indicator
+                if (shooterBubble) {
+                    ctx.fillStyle = shooterBubble.color;
+                    ctx.beginPath();
+                    ctx.arc(target.x, target.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
                 }
+
+                ctx.restore();
             }
 
             function drawBubble(x, y, color, highlight = false) {
@@ -899,6 +965,7 @@
             canvas.addEventListener('mousemove', (e) => {
                 const rect = canvas.getBoundingClientRect();
                 mouseX = e.clientX - rect.left;
+                mouseY = e.clientY - rect.top;
             });
 
             canvas.addEventListener('click', (e) => {
@@ -918,6 +985,7 @@
                 e.preventDefault();
                 const rect = canvas.getBoundingClientRect();
                 mouseX = e.touches[0].clientX - rect.left;
+                mouseY = e.touches[0].clientY - rect.top;
             }, { passive: false });
 
             canvas.addEventListener('touchend', (e) => {
