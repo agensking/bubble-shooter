@@ -1,1628 +1,1002 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>泡泡龙 - Bubble Shooter</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>泡泡龙 - Bubble Shooter</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
 
-        body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            user-select: none;
-            -webkit-user-select: none;
-        }
+body {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+    overflow-y: auto;
+    user-select: none;
+    -webkit-user-select: none;
+    padding: 15px;
+}
 
-        .game-container {
-            position: relative;
-            background: linear-gradient(180deg, #1e3a5f 0%, #0d1b2a 60%, #1b2838 100%);
-            border-radius: 20px;
-            box-shadow:
-                0 0 60px rgba(100, 180, 255, 0.3),
-                0 0 120px rgba(100, 150, 255, 0.1),
-                0 20px 60px rgba(0, 0, 0, 0.5);
-            padding: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-        }
+.game-container {
+    position: relative;
+    background: linear-gradient(180deg, #1e3a5f 0%, #0d1b2a 60%, #1b2838 100%);
+    border-radius: 20px;
+    box-shadow: 0 0 60px rgba(100, 180, 255, 0.3), 0 0 120px rgba(100, 150, 255, 0.1), 0 20px 60px rgba(0, 0, 0, 0.5);
+    padding: 15px 20px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    max-width: 100vw;
+    overflow: hidden;
+}
 
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            margin-bottom: 10px;
-        }
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    margin-bottom: 8px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
 
-        .score-container {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 10px 25px;
-            color: #fff;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+.score-container {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 8px 20px;
+    color: #fff;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.score-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #8ecae6;
+}
+.score-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffd60a;
+    text-shadow: 0 0 20px rgba(255, 214, 10, 0.5);
+}
 
-        .score-label {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #8ecae6;
-        }
+.next-bubble-container {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 8px 16px;
+    color: #fff;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.next-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #8ecae6;
+    margin-bottom: 3px;
+}
+#nextBubble { display: inline-block; }
 
-        .score-value {
-            font-size: 32px;
-            font-weight: bold;
-            color: #ffd60a;
-            text-shadow: 0 0 20px rgba(255, 214, 10, 0.5);
-        }
+.btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(238, 90, 36, 0.6); }
+.btn:active { transform: translateY(0); }
 
-        .next-bubble-container {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 10px 20px;
-            color: #fff;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+canvas {
+    display: block;
+    border-radius: 10px;
+    cursor: crosshair;
+    max-width: 100%;
+}
 
-        .next-label {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #8ecae6;
-            margin-bottom: 5px;
-        }
+.game-over-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    z-index: 500;
+}
+.game-over-overlay.active { opacity: 1; pointer-events: all; }
+.game-over-title {
+    font-size: 42px;
+    font-weight: bold;
+    color: #ff6b6b;
+    text-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+}
+.game-over-score { font-size: 22px; color: #ffd60a; }
 
-        #nextBubble {
-            display: inline-block;
-        }
+.combo-text {
+    position: absolute;
+    font-size: 22px;
+    font-weight: bold;
+    color: #ffd60a;
+    pointer-events: none;
+    animation: floatUp 1s ease-out forwards;
+    text-shadow: 0 0 15px rgba(255, 214, 10, 0.8);
+}
+@keyframes floatUp {
+    0% { opacity:1; transform: translateY(0) scale(1); }
+    100% { opacity:0; transform: translateY(-80px) scale(1.5); }
+}
 
-        .btn {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
-        }
+.particle {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    animation: particleBurst 0.8s ease-out forwards;
+}
+@keyframes particleBurst {
+    0% { opacity:1; transform: translate(0,0) scale(1); }
+    100% { opacity:0; transform: translate(var(--dx), var(--dy)) scale(0); }
+}
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(238, 90, 36, 0.6);
-        }
+.instructions {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 11px;
+    text-align: center;
+    margin-top: 8px;
+    letter-spacing: 1px;
+}
 
-        .btn:active {
-            transform: translateY(0);
-        }
+/* 花蕊绽放 */
+.flower-petal {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50% 50% 0 50%;
+    animation: petalBloom 1.5s ease-out forwards;
+    z-index: 10;
+}
+@keyframes petalBloom {
+    0% { opacity:1; transform: translate(0,0) scale(0.3) rotate(0deg); }
+    50% { opacity:0.9; }
+    100% { opacity:0; transform: translate(var(--px), var(--py)) scale(1.4) rotate(var(--pr)); }
+}
+.stamen {
+    position: absolute;
+    pointer-events: none;
+    background: radial-gradient(circle, #fff7ae, #ffd700);
+    border-radius: 50%;
+    animation: stamenPulse 1.5s ease-out forwards;
+    z-index: 11;
+}
+@keyframes stamenPulse {
+    0% { opacity:1; transform:scale(0); }
+    30% { opacity:1; transform:scale(1.5); }
+    100% { opacity:0; transform:scale(2.5); }
+}
 
-        canvas {
-            display: block;
-            border-radius: 10px;
-            cursor: crosshair;
-        }
+/* 赞美文字 */
+.praise-text {
+    position: absolute;
+    pointer-events: none;
+    z-index: 100;
+    font-weight: bold;
+    text-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+    animation: praiseFloat 2.5s ease-out forwards;
+    white-space: nowrap;
+}
+@keyframes praiseFloat {
+    0% { opacity:0; transform: translateY(20px) scale(0.5); }
+    20% { opacity:1; transform: translateY(0) scale(1.2); }
+    40% { transform: translateY(-10px) scale(1); }
+    100% { opacity:0; transform: translateY(-120px) scale(1.3); }
+}
 
-        .game-over-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease;
-        }
+/* CSS皮卡丘 */
+@keyframes pikaBounce {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-8px); }
+}
+@keyframes earWiggle {
+    0%,100% { transform: rotate(0deg); }
+    15% { transform: rotate(-5deg); }
+    30% { transform: rotate(6deg); }
+    45% { transform: rotate(-3deg); }
+    60% { transform: rotate(4deg); }
+    75% { transform: rotate(-2deg); }
+    90% { transform: rotate(1deg); }
+}
+@keyframes eyeBlink {
+    0%,46%,54%,100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.05); }
+}
+@keyframes cheekGlow {
+    0% { transform: scale(1); box-shadow: 0 0 4px rgba(255,68,68,0.4); }
+    100% { transform: scale(1.1); box-shadow: 0 0 12px rgba(255,68,68,0.6); }
+}
+@keyframes armWave {
+    0% { transform: rotate(0deg) translateY(0); }
+    100% { transform: rotate(5deg) translateY(-3px); }
+}
+@keyframes tailWag {
+    0% { transform: rotate(-8deg); }
+    100% { transform: rotate(5deg); }
+}
 
-        .game-over-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
+.pikachu-fly {
+    position: absolute;
+    pointer-events: none;
+    z-index: 200;
+    animation: pikachuAcross 3s ease-in-out forwards;
+}
+@keyframes pikachuAcross {
+    0% { left: -150px; transform: translateY(0) scaleX(1); }
+    15% { transform: translateY(-30px) scaleX(1); }
+    30% { transform: translateY(0) scaleX(1); }
+    45% { transform: translateY(-40px) scaleX(1); }
+    60% { transform: translateY(0) scaleX(1); }
+    75% { transform: translateY(-20px) scaleX(1); }
+    90% { transform: translateY(0) scaleX(1); }
+    100% { left: calc(100% + 150px); transform: translateY(0) scaleX(1); }
+}
 
-        .game-over-title {
-            font-size: 48px;
-            font-weight: bold;
-            color: #ff6b6b;
-            text-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
-        }
+.big-pikachu {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 300;
+    pointer-events: none;
+    animation: pikachuVictory 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    filter: drop-shadow(0 0 40px rgba(255,215,0,1)) drop-shadow(0 0 80px rgba(255,200,0,0.6));
+}
+@keyframes pikachuVictory {
+    0% { opacity:0; transform: translate(-50%, -50%) scale(0) rotate(-20deg); }
+    60% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); }
+    100% { opacity:1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+}
 
-        .game-over-score {
-            font-size: 24px;
-            color: #ffd60a;
-        }
+.kiss-heart {
+    position: absolute;
+    pointer-events: none;
+    z-index: 201;
+    font-size: 36px;
+    animation: heartFloat 1.5s ease-out forwards;
+}
+@keyframes heartFloat {
+    0% { opacity:1; transform: translate(0,0) scale(0.5); }
+    100% { opacity:0; transform: translate(var(--hx), var(--hy)) scale(1.5); }
+}
 
-        .combo-text {
-            position: absolute;
-            font-size: 24px;
-            font-weight: bold;
-            color: #ffd60a;
-            pointer-events: none;
-            animation: floatUp 1s ease-out forwards;
-            text-shadow: 0 0 15px rgba(255, 214, 10, 0.8);
-        }
+.victory-banner {
+    position: absolute;
+    top: 28%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 301;
+    background: linear-gradient(135deg, #ff1744, #ff6d00, #ffea00);
+    padding: 14px 36px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 28px;
+    color: #fff;
+    white-space: nowrap;
+    pointer-events: none;
+    text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 3px 6px rgba(0,0,0,0.3);
+    box-shadow: 0 0 40px rgba(255,100,0,0.8), 0 10px 30px rgba(0,0,0,0.4);
+    animation: bannerWave 0.6s ease-out 0.5s forwards;
+    opacity: 0;
+}
+@keyframes bannerWave {
+    0% { opacity:0; transform: translate(-50%, -50%) scaleX(0); }
+    100% { opacity:1; transform: translate(-50%, -50%) scaleX(1); }
+}
 
-        @keyframes floatUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-80px) scale(1.5);
-            }
-        }
+.confetti {
+    position: absolute;
+    pointer-events: none;
+    z-index: 299;
+    animation: confettiFall 3s ease-out forwards;
+}
+@keyframes confettiFall {
+    0% { opacity:1; transform: translateY(-100px) rotate(0deg); }
+    100% { opacity:0; transform: translateY(100vh) rotate(720deg); }
+}
 
-        .particle {
-            position: absolute;
-            pointer-events: none;
-            border-radius: 50%;
-            animation: particleBurst 0.8s ease-out forwards;
-        }
-
-        @keyframes particleBurst {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(var(--dx), var(--dy)) scale(0);
-            }
-        }
-
-        .instructions {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 12px;
-            text-align: center;
-            margin-top: 10px;
-            letter-spacing: 1px;
-        }
-
-        /* ===== 花蕊绽放特效 ===== */
-        .flower-petal {
-            position: absolute;
-            pointer-events: none;
-            border-radius: 50% 50% 0 50%;
-            animation: petalBloom 1.5s ease-out forwards;
-            z-index: 10;
-        }
-        @keyframes petalBloom {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(0.3) rotate(0deg);
-            }
-            50% {
-                opacity: 0.9;
-            }
-            100% {
-                opacity: 0;
-                transform: translate(var(--px), var(--py)) scale(1.4) rotate(var(--pr));
-            }
-        }
-
-        .stamen {
-            position: absolute;
-            pointer-events: none;
-            background: radial-gradient(circle, #fff7ae, #ffd700);
-            border-radius: 50%;
-            animation: stamenPulse 1.5s ease-out forwards;
-            z-index: 11;
-        }
-        @keyframes stamenPulse {
-            0% { opacity: 1; transform: scale(0); }
-            30% { opacity: 1; transform: scale(1.5); }
-            100% { opacity: 0; transform: scale(2.5); }
-        }
-
-        /* ===== 特殊赞美文字 ===== */
-        .praise-text {
-            position: absolute;
-            pointer-events: none;
-            z-index: 100;
-            font-weight: bold;
-            text-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
-            animation: praiseFloat 2.5s ease-out forwards;
-            white-space: nowrap;
-        }
-        @keyframes praiseFloat {
-            0% {
-                opacity: 0;
-                transform: translateY(20px) scale(0.5);
-            }
-            20% {
-                opacity: 1;
-                transform: translateY(0) scale(1.2);
-            }
-            40% {
-                transform: translateY(-10px) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-120px) scale(1.3);
-            }
-        }
-
-        /* ===== CSS皮卡丘造型 ===== */
-        .css-pikachu {
-            position: relative;
-            pointer-events: none;
-            animation: pikaBounce 0.6s ease-in-out infinite alternate;
-        }
-        @keyframes pikaBounce {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-8px); }
-        }
-
-        /* --- 身体 --- */
-        .pika-body {
-            position: absolute;
-            background: #FDD835;
-            border-radius: 50%;
-            box-shadow: inset -4px -4px 8px rgba(0,0,0,0.1), inset 4px 4px 8px rgba(255,255,255,0.3);
-        }
-        .pika-body::after {
-            content: '';
-            position: absolute;
-            width: 60%;
-            height: 30%;
-            background: #C8A96E;
-            border-radius: 50%;
-            top: 15%;
-            left: 20%;
-            box-shadow: 0 4px 0 #B8955A;
-        }
-
-        /* --- 头 --- */
-        .pika-head {
-            position: absolute;
-            background: #FDD835;
-            border-radius: 49% 49% 51% 51%;
-            box-shadow: inset -3px -3px 6px rgba(0,0,0,0.08), inset 3px 3px 6px rgba(255,255,255,0.3);
-        }
-
-        /* --- 耳朵 --- */
-        .pika-ear {
-            position: absolute;
-            background: #FDD835;
-            border-radius: 50% 50% 20% 20%;
-            animation: earWiggle 2.5s ease-in-out infinite;
-            z-index: -1;
-        }
-        .pika-ear::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 10%;
-            width: 80%;
-            height: 35%;
-            background: #1a1a1a;
-            border-radius: 50% 50% 15% 15%;
-        }
-        .pika-ear.left {
-            animation-delay: 0s;
-            transform-origin: bottom center;
-        }
-        .pika-ear.right {
-            animation-delay: 0.4s;
-            transform-origin: bottom center;
-        }
-        @keyframes earWiggle {
-            0%, 100% { transform: rotate(0deg); }
-            15% { transform: rotate(-5deg); }
-            30% { transform: rotate(6deg); }
-            45% { transform: rotate(-3deg); }
-            60% { transform: rotate(4deg); }
-            75% { transform: rotate(-2deg); }
-            90% { transform: rotate(1deg); }
-        }
-
-        /* --- 眼睛 --- */
-        .pika-eye {
-            position: absolute;
-            background: #1a1a1a;
-            border-radius: 50%;
-            animation: eyeBlink 4s ease-in-out infinite;
-        }
-        .pika-eye::after {
-            content: '';
-            position: absolute;
-            width: 35%;
-            height: 35%;
-            background: #fff;
-            border-radius: 50%;
-            top: 15%;
-            left: 25%;
-        }
-        @keyframes eyeBlink {
-            0%, 46%, 54%, 100% { transform: scaleY(1); }
-            50% { transform: scaleY(0.05); }
-        }
-
-        /* --- 红脸颊 --- */
-        .pika-cheek {
-            position: absolute;
-            background: #FF4444;
-            border-radius: 50%;
-            animation: cheekGlow 1.5s ease-in-out infinite alternate;
-        }
-        @keyframes cheekGlow {
-            0% { transform: scale(1); box-shadow: 0 0 4px rgba(255,68,68,0.4); }
-            100% { transform: scale(1.1); box-shadow: 0 0 12px rgba(255,68,68,0.6); }
-        }
-        .pika-cheek.left { animation-delay: 0s; }
-        .pika-cheek.right { animation-delay: 0.5s; }
-
-        /* --- 鼻子 --- */
-        .pika-nose {
-            position: absolute;
-            background: #1a1a1a;
-            border-radius: 50%;
-        }
-
-        /* --- 嘴 --- */
-        .pika-mouth {
-            position: absolute;
-            width: 0;
-            height: 0;
-        }
-        .pika-mouth::before,
-        .pika-mouth::after {
-            content: '';
-            position: absolute;
-            border-radius: 50%;
-            border: 2px solid #1a1a1a;
-            border-color: transparent transparent #1a1a1a #1a1a1a;
-            animation: mouthSmile 3s ease-in-out infinite;
-        }
-        @keyframes mouthSmile {
-            0%, 100% { transform: rotate(40deg); }
-            25% { transform: rotate(42deg); }
-            75% { transform: rotate(38deg); }
-        }
-
-        /* --- 前爪 --- */
-        .pika-arm {
-            position: absolute;
-            background: #FDD835;
-            border-radius: 50%;
-            animation: armWave 1.2s ease-in-out infinite alternate;
-        }
-        .pika-arm.right {
-            animation-delay: 0.3s;
-        }
-        @keyframes armWave {
-            0% { transform: rotate(0deg) translateY(0); }
-            100% { transform: rotate(5deg) translateY(-3px); }
-        }
-
-        /* --- 后脚 --- */
-        .pika-foot {
-            position: absolute;
-            background: #F5C800;
-            border-radius: 45% 45% 50% 50%;
-        }
-
-        /* --- 闪电尾巴 --- */
-        .pika-tail {
-            position: absolute;
-            animation: tailWag 0.8s ease-in-out infinite alternate;
-            transform-origin: bottom left;
-            z-index: -2;
-        }
-        @keyframes tailWag {
-            0% { transform: rotate(-8deg); }
-            100% { transform: rotate(5deg); }
-        }
-        .pika-tail svg {
-            display: block;
-        }
-
-        /* ===== 皮卡丘飞行容器 ===== */
-        .pikachu-fly {
-            position: absolute;
-            pointer-events: none;
-            z-index: 200;
-            animation: pikachuAcross 3s ease-in-out forwards;
-        }
-        @keyframes pikachuAcross {
-            0% {
-                left: -150px;
-                transform: translateY(0) scaleX(1);
-            }
-            15% {
-                transform: translateY(-30px) scaleX(1);
-            }
-            30% {
-                transform: translateY(0) scaleX(1);
-            }
-            45% {
-                transform: translateY(-40px) scaleX(1);
-            }
-            60% {
-                transform: translateY(0) scaleX(1);
-            }
-            75% {
-                transform: translateY(-20px) scaleX(1);
-            }
-            90% {
-                transform: translateY(0) scaleX(1);
-            }
-            100% {
-                left: calc(100% + 150px);
-                transform: translateY(0) scaleX(1);
-            }
-        }
-
-        /* ===== 通关大皮卡丘 ===== */
-        .big-pikachu {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 300;
-            pointer-events: none;
-            animation: pikachuVictory 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1)) drop-shadow(0 0 80px rgba(255, 200, 0, 0.6));
-        }
-        @keyframes pikachuVictory {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0) rotate(-20deg);
-            }
-            60% {
-                transform: translate(-50%, -50%) scale(1.2) rotate(5deg);
-            }
-            100% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1) rotate(0deg);
-            }
-        }
-
-        /* ===== 皮卡丘亲吻爱心 ===== */
-        .kiss-heart {
-            position: absolute;
-            pointer-events: none;
-            z-index: 201;
-            font-size: 40px;
-            animation: heartFloat 1.5s ease-out forwards;
-        }
-        @keyframes heartFloat {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(0.5);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(var(--hx), var(--hy)) scale(1.5);
-            }
-        }
-    </style>
-
-        .victory-banner {
-            position: absolute;
-            top: 32%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 301;
-            background: linear-gradient(135deg, #ff1744, #ff6d00, #ffea00);
-            padding: 15px 40px;
-            border-radius: 15px;
-            font-weight: bold;
-            font-size: 32px;
-            color: #fff;
-            white-space: nowrap;
-            pointer-events: none;
-            text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 3px 6px rgba(0,0,0,0.3);
-            box-shadow: 0 0 40px rgba(255, 100, 0, 0.8), 0 10px 30px rgba(0,0,0,0.4);
-            animation: bannerWave 0.6s ease-out 0.5s forwards;
-            opacity: 0;
-        }
-        @keyframes bannerWave {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scaleX(0);
-            }
-            100% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scaleX(1);
-            }
-        }
-
-        .confetti {
-            position: absolute;
-            pointer-events: none;
-            z-index: 299;
-            animation: confettiFall 3s ease-out forwards;
-        }
-        @keyframes confettiFall {
-            0% {
-                opacity: 1;
-                transform: translateY(-100px) rotate(0deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(100vh) rotate(720deg);
-            }
-        }
-    </style>
+@media (max-width: 500px) {
+    .game-container { padding: 10px; border-radius: 12px; }
+    .game-header { padding: 5px; gap: 5px; }
+    .score-container { padding: 5px 12px; }
+    .score-value { font-size: 22px; }
+    .btn { padding: 7px 14px; font-size: 12px; }
+    .next-bubble-container { padding: 5px 10px; }
+    .victory-banner { font-size: 16px; padding: 8px 18px; }
+}
+</style>
 </head>
 <body>
-    <div class="game-container" id="gameContainer">
-        <div class="game-header">
-            <div class="score-container">
-                <div class="score-label">得分</div>
-                <div class="score-value" id="score">0</div>
-            </div>
-            <button class="btn" id="restartBtn">重新开始</button>
-            <div class="next-bubble-container">
-                <div class="next-label">下一个</div>
-                <div id="nextBubble"></div>
-            </div>
+<div class="game-container" id="gameContainer">
+    <div class="game-header">
+        <div class="score-container">
+            <div class="score-label">得分</div>
+            <div class="score-value" id="score">0</div>
         </div>
-        <canvas id="gameCanvas"></canvas>
-        <div class="game-over-overlay" id="gameOverOverlay">
-            <div class="game-over-title" id="gameOverTitle">游戏结束</div>
-            <div class="game-over-score" id="gameOverScore">得分: 0</div>
-            <button class="btn" id="playAgainBtn">再来一局</button>
-        </div>
-        <div class="instructions">
-            🖱️ 移动鼠标瞄准 · 点击发射泡泡 · 匹配3个同色泡泡消除
+        <button class="btn" id="restartBtn">重新开始</button>
+        <div class="next-bubble-container">
+            <div class="next-label">下一个</div>
+            <div id="nextBubble"></div>
         </div>
     </div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="game-over-overlay" id="gameOverOverlay">
+        <div class="game-over-title" id="gameOverTitle">游戏结束</div>
+        <div class="game-over-score" id="gameOverScore">得分: 0</div>
+        <button class="btn" id="playAgainBtn">再来一局</button>
+    </div>
+    <div class="instructions">🖱️ 移动鼠标瞄准 · 点击发射泡泡 · 匹配3个同色泡泡消除</div>
+</div>
 
-    <script>
-        (function() {
-            const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d');
-            const scoreElement = document.getElementById('score');
-            const nextBubbleDiv = document.getElementById('nextBubble');
-            const gameOverOverlay = document.getElementById('gameOverOverlay');
-            const gameOverScore = document.getElementById('gameOverScore');
-            const gameOverTitle = document.getElementById('gameOverTitle');
-            const gameContainer = document.getElementById('gameContainer');
+<script>
+(function() {
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const scoreElement = document.getElementById('score');
+const nextBubbleDiv = document.getElementById('nextBubble');
+const gameOverOverlay = document.getElementById('gameOverOverlay');
+const gameOverScore = document.getElementById('gameOverScore');
+const gameOverTitle = document.getElementById('gameOverTitle');
+const gameContainer = document.getElementById('gameContainer');
 
-            // Game constants
-            const COLS = 12;
-            const ROWS = 12;
-            const BUBBLE_RADIUS = 18;
-            const BUBBLE_DIAMETER = BUBBLE_RADIUS * 2;
-            const SHOOTER_Y_OFFSET = 50;
-            const COLORS = [
-                '#ff6b6b', // 红
-                '#ffd93d', // 黄
-                '#6bcb77', // 绿
-                '#4d96ff', // 蓝
-                '#ff922b', // 橙
-                '#cc5de8', // 紫
-            ];
+// Game constants
+const COLS = 12, ROWS = 12;
+const BUBBLE_RADIUS = 18;
+const BUBBLE_DIAMETER = BUBBLE_RADIUS * 2;
+const SHOOTER_Y_OFFSET = 50;
+const COLORS = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff922b','#cc5de8'];
 
-            let grid = [];
-            let shooterBubble = null;
-            let nextBubble = null;
-            let bubbleX, bubbleY;
-            let bubbleVX, bubbleVY;
-            let isShooting = false;
-            let score = 0;
-            let comboCount = 0;
-            let mouseX = 0;
-            let mouseY = 0;
-            let animationId = null;
-            let gameRunning = true;
-            let victoryTriggered = false;
+let grid = [], shooterBubble = null, nextBubble = null;
+let bubbleX, bubbleY, bubbleVX, bubbleVY;
+let isShooting = false, score = 0, comboCount = 0;
+let mouseX = 0, mouseY = 0, animationId = null;
+let gameRunning = true, victoryTriggered = false;
 
-            // Set canvas size
-            const GRID_OFFSET_X = 20;
-            const GRID_OFFSET_Y = 30;
-            canvas.width = COLS * BUBBLE_DIAMETER + GRID_OFFSET_X * 2;
-            canvas.height = ROWS * BUBBLE_DIAMETER + GRID_OFFSET_Y + SHOOTER_Y_OFFSET + 40;
+const GRID_OFFSET_X = 20, GRID_OFFSET_Y = 30;
+canvas.width = COLS * BUBBLE_DIAMETER + GRID_OFFSET_X * 2;
+canvas.height = ROWS * BUBBLE_DIAMETER + GRID_OFFSET_Y + SHOOTER_Y_OFFSET + 40;
 
-            const SHOOTER_X = canvas.width / 2;
-            const SHOOTER_Y = canvas.height - SHOOTER_Y_OFFSET;
-            // Initialize mouse position to point upward
-            mouseX = SHOOTER_X;
-            mouseY = SHOOTER_Y - 100;
-            const GRID_BOTTOM = canvas.height - SHOOTER_Y_OFFSET - 30;
+const SHOOTER_X = canvas.width / 2;
+const SHOOTER_Y = canvas.height - SHOOTER_Y_OFFSET;
+mouseX = SHOOTER_X;
+mouseY = SHOOTER_Y - 100;
 
-            function getGridX(col, row) {
-                const offset = (row % 2 === 0) ? 0 : BUBBLE_RADIUS;
-                return GRID_OFFSET_X + col * BUBBLE_DIAMETER + BUBBLE_RADIUS + offset;
+function getGridX(col, row) {
+    const offset = (row % 2 === 0) ? 0 : BUBBLE_RADIUS;
+    return GRID_OFFSET_X + col * BUBBLE_DIAMETER + BUBBLE_RADIUS + offset;
+}
+function getGridY(row) {
+    return GRID_OFFSET_Y + row * BUBBLE_DIAMETER + BUBBLE_RADIUS;
+}
+function randomColor() { return COLORS[Math.floor(Math.random() * COLORS.length)]; }
+function createBubble(color) { return { color, active: true }; }
+
+function initGrid() {
+    grid = [];
+    const startRows = 5;
+    for (let row = 0; row < ROWS; row++) {
+        grid[row] = [];
+        const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
+        for (let col = 0; col < COLS; col++) {
+            grid[row][col] = (row < startRows && col < colsInRow) ? createBubble(randomColor()) : null;
+        }
+    }
+}
+
+function getBubbleAt(col, row) {
+    if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return null;
+    return grid[row][col];
+}
+function isPositionValid(col, row) {
+    if (row < 0 || row >= ROWS) return false;
+    const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
+    return col >= 0 && col < colsInRow;
+}
+
+function getNeighbors(col, row) {
+    const neighbors = [];
+    const isEvenRow = row % 2 === 0;
+    const offsets = isEvenRow
+        ? [[-1,1],[0,1],[-1,0],[1,0],[-1,-1],[0,-1]]
+        : [[0,1],[1,1],[-1,0],[1,0],[0,-1],[1,-1]];
+    for (const [dc, dr] of offsets) {
+        const nc = col + dc, nr = row + dr;
+        if (isPositionValid(nc, nr)) neighbors.push({ col: nc, row: nr });
+    }
+    return neighbors;
+}
+
+function findConnected(col, row, color) {
+    const toRemove = new Set(), visited = new Set();
+    const queue = [{ col, row }];
+    visited.add(`${col},${row}`);
+    while (queue.length > 0) {
+        const cur = queue.shift();
+        const b = getBubbleAt(cur.col, cur.row);
+        if (b && b.active && b.color === color) {
+            toRemove.add(`${cur.col},${cur.row}`);
+            for (const n of getNeighbors(cur.col, cur.row)) {
+                const k = `${n.col},${n.row}`;
+                if (!visited.has(k)) { visited.add(k); queue.push(n); }
             }
+        }
+    }
+    return toRemove;
+}
 
-            function getGridY(row) {
-                return GRID_OFFSET_Y + row * BUBBLE_DIAMETER + BUBBLE_RADIUS;
+function findFloating() {
+    const connected = new Set(), queue = [];
+    for (let col = 0; col < COLS; col++) {
+        const b = getBubbleAt(col, 0);
+        if (b && b.active && !connected.has(`${col},0`)) {
+            connected.add(`${col},0`);
+            queue.push({ col, row: 0 });
+        }
+    }
+    while (queue.length > 0) {
+        const cur = queue.shift();
+        for (const n of getNeighbors(cur.col, cur.row)) {
+            const k = `${n.col},${n.row}`;
+            const b = getBubbleAt(n.col, n.row);
+            if (b && b.active && !connected.has(k)) { connected.add(k); queue.push(n); }
+        }
+    }
+    const floating = [];
+    for (let row = 0; row < ROWS; row++) {
+        const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
+        for (let col = 0; col < colsInRow; col++) {
+            const b = getBubbleAt(col, row);
+            if (b && b.active && !connected.has(`${col},${row}`)) floating.push({ col, row });
+        }
+    }
+    return floating;
+}
+
+function createParticles(x, y, color) {
+    const rect = canvas.getBoundingClientRect();
+    const cr = gameContainer.getBoundingClientRect();
+    const ox = rect.left - cr.left + 15, oy = rect.top - cr.top + 15;
+    for (let i = 0; i < 12; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const a = (Math.PI * 2 * i) / 12, d = 30 + Math.random() * 40;
+        p.style.cssText = `left:${ox+x}px;top:${oy+y}px;width:8px;height:8px;background:${color};--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d}px;`;
+        gameContainer.appendChild(p);
+        setTimeout(() => p.remove(), 800);
+    }
+}
+
+function showCombo(x, y, text) {
+    const rect = canvas.getBoundingClientRect();
+    const cr = gameContainer.getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'combo-text';
+    el.textContent = text;
+    el.style.cssText = `left:${rect.left-cr.left+x+15}px;top:${rect.top-cr.top+y+15}px;`;
+    gameContainer.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+}
+
+function showFlowerBloom(x, y) {
+    const rect = canvas.getBoundingClientRect();
+    const cr = gameContainer.getBoundingClientRect();
+    const cx = rect.left - cr.left + x + 15, cy = rect.top - cr.top + y + 15;
+    const petalColors = ['#ff69b4','#ff85c0','#ffb6c1','#ff1493','#ff6eb4','#ff99cc','#ff4081','#f06292'];
+    for (let i = 0; i < 12; i++) {
+        const petal = document.createElement('div');
+        petal.className = 'flower-petal';
+        const a = (Math.PI * 2 * i) / 12, d = 50 + Math.random() * 40;
+        petal.style.cssText = `left:${cx}px;top:${cy}px;width:20px;height:20px;background:${petalColors[i%8]};--px:${Math.cos(a)*d}px;--py:${Math.sin(a)*d}px;--pr:${(Math.random()-0.5)*120}deg;`;
+        gameContainer.appendChild(petal);
+        setTimeout(() => petal.remove(), 1500);
+    }
+    const stamen = document.createElement('div');
+    stamen.className = 'stamen';
+    stamen.style.cssText = `left:${cx-12}px;top:${cy-12}px;width:24px;height:24px;`;
+    gameContainer.appendChild(stamen);
+    setTimeout(() => stamen.remove(), 1500);
+}
+
+function showPraise(text, color) {
+    const cr = gameContainer.getBoundingClientRect();
+    const cx = cr.width / 2, cy = cr.height * 0.42;
+    const el = document.createElement('div');
+    el.className = 'praise-text';
+    el.textContent = text;
+    el.style.cssText = `left:${cx}px;top:${cy}px;transform:translate(-50%,0);color:${color};font-size:34px;`;
+    gameContainer.appendChild(el);
+    setTimeout(() => el.remove(), 2500);
+}
+
+function buildPikachu(s) {
+    const c = document.createElement('div');
+    c.style.cssText = `position:relative;width:${s}px;height:${s}px;pointer-events:none;animation:pikaBounce 0.6s ease-in-out infinite alternate;`;
+
+    // Tail
+    const tw = s * 0.15, th = s * 0.28;
+    const tail = document.createElement('div');
+    tail.style.cssText = `position:absolute;width:${tw}px;height:${th}px;bottom:${s*0.1}px;right:${-s*0.02}px;animation:tailWag 0.8s ease-in-out infinite alternate;transform-origin:bottom left;z-index:-2;`;
+    tail.innerHTML = `<svg width="${tw}" height="${th}" viewBox="0 0 30 65"><polygon points="15,0 30,20 20,20 28,55 10,35 18,35 2,10 15,10" fill="#FDD835" stroke="#DAA520" stroke-width="1"/><polygon points="15,2 27,19 19,19 25,50 11,35 17,35 4,12 14,12" fill="#C8A96E"/></svg>`;
+    c.appendChild(tail);
+
+    // Feet
+    const fw = s * 0.12, fh = s * 0.065, fy = s * 0.78;
+    [s*0.28, s*0.6].forEach(lx => {
+        const f = document.createElement('div');
+        f.style.cssText = `position:absolute;width:${fw}px;height:${fh}px;left:${lx}px;top:${fy}px;background:#F0C300;border-radius:45% 45% 50% 50%;`;
+        c.appendChild(f);
+    });
+
+    // Body
+    const body = document.createElement('div');
+    body.style.cssText = `position:absolute;width:${s*0.55}px;height:${s*0.4}px;left:${s*0.225}px;top:${s*0.45}px;background:#FDD835;border-radius:50%;box-shadow:inset -4px -4px 8px rgba(0,0,0,0.1),inset 4px 4px 8px rgba(255,255,255,0.3);`;
+    c.appendChild(body);
+
+    // Arms
+    const as = s * 0.11, ay = s * 0.52;
+    [s*0.22, s*0.67].forEach((lx, i) => {
+        const arm = document.createElement('div');
+        arm.style.cssText = `position:absolute;width:${as}px;height:${as}px;left:${lx}px;top:${ay}px;background:#FDD835;border-radius:50%;animation:armWave 1.2s ease-in-out infinite alternate;animation-delay:${i*0.3}s;`;
+        c.appendChild(arm);
+    });
+
+    // Head
+    const hs = s * 0.62;
+    const head = document.createElement('div');
+    head.style.cssText = `position:absolute;width:${hs}px;height:${hs*0.85}px;left:${s*0.19}px;top:${s*0.06}px;background:#FDD835;border-radius:49% 49% 51% 51%;box-shadow:inset -3px -3px 6px rgba(0,0,0,0.08),inset 3px 3px 6px rgba(255,255,255,0.3);`;
+    c.appendChild(head);
+
+    // Ears
+    const ew = s * 0.14, eh = s * 0.35;
+    [{l:s*0.23, d:0}, {l:s*0.63, d:0.4}].forEach(({l, d}) => {
+        const ear = document.createElement('div');
+        ear.style.cssText = `position:absolute;width:${ew}px;height:${eh}px;left:${l}px;top:${-s*0.15}px;background:#FDD835;border-radius:50% 50% 20% 20%;animation:earWiggle 2.5s ease-in-out infinite;animation-delay:${d}s;z-index:-1;`;
+        const tip = document.createElement('div');
+        tip.style.cssText = `position:absolute;top:0;left:10%;width:80%;height:35%;background:#1a1a1a;border-radius:50% 50% 15% 15%;`;
+        ear.appendChild(tip);
+        c.appendChild(ear);
+    });
+
+    // Eyes
+    const es = s * 0.085;
+    [s*0.31, s*0.59].forEach(lx => {
+        const eye = document.createElement('div');
+        eye.style.cssText = `position:absolute;width:${es}px;height:${es*1.15}px;left:${lx}px;top:${s*0.2}px;background:#1a1a1a;border-radius:50%;animation:eyeBlink 4s ease-in-out infinite;`;
+        const hl = document.createElement('div');
+        hl.style.cssText = `position:absolute;width:35%;height:35%;background:#fff;border-radius:50%;top:15%;left:25%;`;
+        eye.appendChild(hl);
+        c.appendChild(eye);
+    });
+
+    // Cheeks
+    const cs = s * 0.08;
+    [s*0.24, s*0.66].forEach((lx, i) => {
+        const cheek = document.createElement('div');
+        cheek.style.cssText = `position:absolute;width:${cs}px;height:${cs*0.7}px;left:${lx}px;top:${s*0.32}px;background:#FF4444;border-radius:50%;animation:cheekGlow 1.5s ease-in-out infinite alternate;animation-delay:${i*0.5}s;`;
+        c.appendChild(cheek);
+    });
+
+    // Nose
+    const nose = document.createElement('div');
+    nose.style.cssText = `position:absolute;width:${s*0.025}px;height:${s*0.025}px;left:${s*0.485}px;top:${s*0.28}px;background:#1a1a1a;border-radius:50%;`;
+    c.appendChild(nose);
+
+    // Mouth
+    const mouth = document.createElement('div');
+    const mw = s * 0.16, mh = s * 0.08;
+    mouth.style.cssText = `position:absolute;left:${s*0.42}px;top:${s*0.29}px;width:${mw}px;height:${mh}px;`;
+    mouth.innerHTML = `<svg width="${mw}" height="${mh}" viewBox="0 0 40 20"><path d="M5,2 Q12,14 20,4 Q28,14 35,2" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+    c.appendChild(mouth);
+
+    return c;
+}
+
+function showPikachuFly() {
+    const size = 80;
+    const cr = gameContainer.getBoundingClientRect();
+    const cy = cr.height * 0.35;
+    const el = document.createElement('div');
+    el.className = 'pikachu-fly';
+    el.style.cssText = `top:${cy}px;left:-100px;width:${size}px;height:${size}px;`;
+    el.appendChild(buildPikachu(size));
+    gameContainer.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+    for (let i = 0; i < 8; i++) {
+        setTimeout(() => {
+            const heart = document.createElement('div');
+            heart.className = 'kiss-heart';
+            heart.textContent = ['❤️','💕','💖','💗','💘','💝','😘','💋'][i];
+            heart.style.cssText = `top:${cy}px;left:${cr.width*(0.3+Math.random()*0.4)}px;--hx:${(Math.random()-0.5)*160}px;--hy:${-(80+Math.random()*120)}px;`;
+            gameContainer.appendChild(heart);
+            setTimeout(() => heart.remove(), 1500);
+        }, 400 + i * 200);
+    }
+}
+
+function showVictory() {
+    if (victoryTriggered) return;
+    victoryTriggered = true;
+    gameRunning = false;
+
+    const bigPika = document.createElement('div');
+    bigPika.className = 'big-pikachu';
+    const bigSize = 200;
+    bigPika.style.width = bigSize + 'px';
+    bigPika.style.height = bigSize + 'px';
+    bigPika.appendChild(buildPikachu(bigSize));
+    gameContainer.appendChild(bigPika);
+    setTimeout(() => bigPika.remove(), 5000);
+
+    const banner = document.createElement('div');
+    banner.className = 'victory-banner';
+    banner.textContent = '🏆 傲崽牛逼！！！🏆';
+    gameContainer.appendChild(banner);
+    setTimeout(() => banner.remove(), 5000);
+
+    const colors = ['#ff1744','#ffea00','#00e676','#2979ff','#d500f9','#ff6d00','#00e5ff','#ff4081'];
+    const cr = gameContainer.getBoundingClientRect();
+    for (let i = 0; i < 60; i++) {
+        setTimeout(() => {
+            const conf = document.createElement('div');
+            conf.className = 'confetti';
+            const sz = 6 + Math.random() * 10;
+            conf.style.cssText = `left:${Math.random()*cr.width}px;top:-20px;width:${sz}px;height:${sz*1.5}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>0.5?'50%':'2px'};animation-delay:${Math.random()}s;animation-duration:${2+Math.random()*3}s;`;
+            gameContainer.appendChild(conf);
+            setTimeout(() => conf.remove(), 4000);
+        }, i * 30);
+    }
+}
+
+function removeBubbles(bubbleSet) {
+    let removed = 0;
+    for (const key of bubbleSet) {
+        const [col, row] = key.split(',').map(Number);
+        const b = getBubbleAt(col, row);
+        if (b) {
+            createParticles(getGridX(col, row), getGridY(row), b.color);
+            grid[row][col] = null;
+            removed++;
+        }
+    }
+    return removed;
+}
+
+function snapBubbleToGrid() {
+    let bestCol = -1, bestRow = -1, bestDist = Infinity;
+    for (let row = 0; row < ROWS; row++) {
+        const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
+        for (let col = 0; col < colsInRow; col++) {
+            if (grid[row][col] && grid[row][col].active) continue;
+            const gx = getGridX(col, row), gy = getGridY(row);
+            const dx = bubbleX - gx, dy = bubbleY - gy;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < BUBBLE_DIAMETER * 0.8 && dist < bestDist) {
+                bestDist = dist; bestCol = col; bestRow = row;
             }
-
-            function randomColor() {
-                return COLORS[Math.floor(Math.random() * COLORS.length)];
+        }
+    }
+    if (bestRow >= 0) {
+        grid[bestRow][bestCol] = createBubble(shooterBubble.color);
+        const connected = findConnected(bestCol, bestRow, shooterBubble.color);
+        let pointsEarned = 0;
+        const matchCount = connected.size;
+        if (matchCount >= 3) {
+            const removed = removeBubbles(connected);
+            pointsEarned = removed * 10;
+            comboCount++;
+            const snapX = getGridX(bestCol, bestRow), snapY = getGridY(bestRow);
+            if (matchCount === 3) {
+                showFlowerBloom(snapX, snapY);
+                showPraise('🌸 傲崽真棒 🌸', '#ff69b4');
+            } else if (matchCount >= 4 && matchCount <= 6) {
+                showPikachuFly();
+                showPraise('⚡ 傲崽，想亲亲你 💋', '#ffd700');
+            } else if (matchCount >= 7) {
+                showVictory();
+                setTimeout(() => endGame(true), 5000);
             }
-
-            function createBubble(color) {
-                return { color, active: true };
+            const floating = findFloating();
+            if (floating.length > 0) {
+                for (const { col, row } of floating) {
+                    const b = getBubbleAt(col, row);
+                    if (b) { createParticles(getGridX(col, row), getGridY(row), b.color); grid[row][col] = null; }
+                }
+                pointsEarned += floating.length * 20;
+                showCombo(getGridX(floating[0].col, floating[0].row), getGridY(floating[0].row) - 20, `🌟 掉落 +${floating.length * 20}!`);
             }
+        } else { comboCount = 0; }
+        score += pointsEarned;
+        updateScore();
+        checkGameOver();
+    }
+    return bestRow >= 0;
+}
 
-            function initGrid() {
-                grid = [];
-                const startRows = 5;
-                for (let row = 0; row < ROWS; row++) {
-                    grid[row] = [];
-                    const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
-                    for (let col = 0; col < COLS; col++) {
-                        if (row < startRows && col < colsInRow) {
-                            grid[row][col] = createBubble(randomColor());
-                        } else {
-                            grid[row][col] = null;
-                        }
-                    }
+function checkGameOver() {
+    for (let row = ROWS - 3; row < ROWS; row++) {
+        const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
+        for (let col = 0; col < colsInRow; col++) {
+            if (grid[row][col] && grid[row][col].active) { endGame(false); return; }
+        }
+    }
+    let hasBubbles = false;
+    for (let row = 0; row < ROWS; row++) {
+        const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
+        for (let col = 0; col < colsInRow; col++) {
+            if (grid[row][col] && grid[row][col].active) { hasBubbles = true; break; }
+        }
+        if (hasBubbles) break;
+    }
+    if (!hasBubbles) endGame(true);
+}
+
+function endGame(won) {
+    gameRunning = false;
+    gameOverTitle.textContent = won ? '🎉 恭喜通关!' : '💀 游戏结束';
+    gameOverTitle.style.color = won ? '#6bcb77' : '#ff6b6b';
+    gameOverScore.textContent = `最终得分: ${score}`;
+    gameOverOverlay.classList.add('active');
+}
+
+function updateScore() { scoreElement.textContent = score; }
+
+function shootBubble(targetX, targetY) {
+    if (isShooting || !gameRunning || victoryTriggered) return;
+    const dx = targetX - SHOOTER_X, dy = targetY - SHOOTER_Y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 1) return;
+    const speed = 12;
+    bubbleVX = (dx / dist) * speed;
+    bubbleVY = (dy / dist) * speed;
+    bubbleX = SHOOTER_X; bubbleY = SHOOTER_Y;
+    isShooting = true;
+}
+
+function updateBubble() {
+    if (!isShooting) return;
+    bubbleX += bubbleVX; bubbleY += bubbleVY;
+    if (bubbleX - BUBBLE_RADIUS <= 0) { bubbleX = BUBBLE_RADIUS; bubbleVX = Math.abs(bubbleVX); }
+    if (bubbleX + BUBBLE_RADIUS >= canvas.width) { bubbleX = canvas.width - BUBBLE_RADIUS; bubbleVX = -Math.abs(bubbleVX); }
+    if (bubbleY - BUBBLE_RADIUS <= GRID_OFFSET_Y) {
+        bubbleY = GRID_OFFSET_Y + BUBBLE_RADIUS;
+        if (!snapBubbleToGrid()) placeBubbleAtTop();
+        isShooting = false; nextTurn(); return;
+    }
+    for (let row = 0; row < ROWS; row++) {
+        const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
+        for (let col = 0; col < colsInRow; col++) {
+            if (grid[row][col] && grid[row][col].active) {
+                const gx = getGridX(col, row), gy = getGridY(row);
+                const dx = bubbleX - gx, dy = bubbleY - gy;
+                if (Math.sqrt(dx*dx+dy*dy) < BUBBLE_DIAMETER) {
+                    if (!snapBubbleToGrid()) placeBubbleAtTop();
+                    isShooting = false; nextTurn(); return;
                 }
             }
+        }
+    }
+    if (bubbleY - BUBBLE_RADIUS > canvas.height) { isShooting = false; nextTurn(); }
+}
 
-            function getBubbleAt(col, row) {
-                if (row < 0 || row >= ROWS) return null;
-                if (col < 0 || col >= COLS) return null;
-                return grid[row][col];
+function placeBubbleAtTop() {
+    let bestCol = 0, bestRow = 0, bestDist = Infinity;
+    for (let row = 0; row < ROWS; row++) {
+        const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
+        for (let col = 0; col < colsInRow; col++) {
+            if (!grid[row][col] || !grid[row][col].active) {
+                const gx = getGridX(col, row), gy = getGridY(row);
+                const dx = bubbleX - gx, dy = bubbleY - gy;
+                const dist = Math.sqrt(dx*dx+dy*dy);
+                if (dist < bestDist) { bestDist = dist; bestCol = col; bestRow = row; }
             }
-
-            function isPositionValid(col, row) {
-                if (row < 0 || row >= ROWS) return false;
-                const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
-                if (col < 0 || col >= colsInRow) return false;
-                return true;
-            }
-
-            function getNeighbors(col, row) {
-                const neighbors = [];
-                const isEvenRow = row % 2 === 0;
-
-                const offsets = isEvenRow ? [
-                    [-1, 1], [0, 1],   // 左下, 右下
-                    [-1, 0], [1, 0],    // 左, 右
-                    [-1, -1], [0, -1],  // 左上, 右上
-                ] : [
-                    [0, 1], [1, 1],     // 左下, 右下
-                    [-1, 0], [1, 0],    // 左, 右
-                    [0, -1], [1, -1],   // 左上, 右上
-                ];
-
-                for (const [dc, dr] of offsets) {
-                    const nc = col + dc;
-                    const nr = row + dr;
-                    if (isPositionValid(nc, nr)) {
-                        neighbors.push({ col: nc, row: nr });
-                    }
-                }
-                return neighbors;
-            }
-
-            function findConnected(col, row, color) {
-                const toRemove = new Set();
-                const visited = new Set();
-                const queue = [{ col, row }];
-                visited.add(`${col},${row}`);
-
-                while (queue.length > 0) {
-                    const current = queue.shift();
-                    const bubble = getBubbleAt(current.col, current.row);
-                    if (bubble && bubble.active && bubble.color === color) {
-                        toRemove.add(`${current.col},${current.row}`);
-                        for (const n of getNeighbors(current.col, current.row)) {
-                            const key = `${n.col},${n.row}`;
-                            if (!visited.has(key)) {
-                                visited.add(key);
-                                queue.push(n);
-                            }
-                        }
-                    }
-                }
-
-                return toRemove;
-            }
-
-            function findFloating() {
-                const connected = new Set();
-                const queue = [];
-
-                // BFS from all bubbles in row 0
-                for (let col = 0; col < COLS; col++) {
-                    const bubble = getBubbleAt(col, 0);
-                    if (bubble && bubble.active) {
-                        const key = `${col},0`;
-                        if (!connected.has(key)) {
-                            connected.add(key);
-                            queue.push({ col, row: 0 });
-                        }
-                    }
-                }
-
-                while (queue.length > 0) {
-                    const current = queue.shift();
-                    for (const n of getNeighbors(current.col, current.row)) {
-                        const key = `${n.col},${n.row}`;
-                        const bubble = getBubbleAt(n.col, n.row);
-                        if (bubble && bubble.active && !connected.has(key)) {
-                            connected.add(key);
-                            queue.push(n);
-                        }
-                    }
-                }
-
-                // All active bubbles not in 'connected' are floating
-                const floating = [];
-                for (let row = 0; row < ROWS; row++) {
-                    const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
-                    for (let col = 0; col < colsInRow; col++) {
-                        const bubble = getBubbleAt(col, row);
-                        if (bubble && bubble.active && !connected.has(`${col},${row}`)) {
-                            floating.push({ col, row });
-                        }
-                    }
-                }
-                return floating;
-            }
-
-            function createParticles(x, y, color) {
-                const rect = canvas.getBoundingClientRect();
-                const containerRect = gameContainer.getBoundingClientRect();
-                const offsetX = rect.left - containerRect.left + 20;
-                const offsetY = rect.top - containerRect.top + 20;
-
-                for (let i = 0; i < 12; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
-                    const angle = (Math.PI * 2 * i) / 12;
-                    const distance = 30 + Math.random() * 40;
-                    particle.style.cssText = `
-                        left: ${offsetX + x}px;
-                        top: ${offsetY + y}px;
-                        width: 8px;
-                        height: 8px;
-                        background: ${color};
-                        --dx: ${Math.cos(angle) * distance}px;
-                        --dy: ${Math.sin(angle) * distance}px;
-                    `;
-                    gameContainer.appendChild(particle);
-                    setTimeout(() => particle.remove(), 800);
-                }
-            }
-
-            function showCombo(x, y, text) {
-                const rect = canvas.getBoundingClientRect();
-                const containerRect = gameContainer.getBoundingClientRect();
-                const comboEl = document.createElement('div');
-                comboEl.className = 'combo-text';
-                comboEl.textContent = text;
-                comboEl.style.cssText = `
-                    left: ${rect.left - containerRect.left + x + 20}px;
-                    top: ${rect.top - containerRect.top + y + 20}px;
-                `;
-                gameContainer.appendChild(comboEl);
-                setTimeout(() => comboEl.remove(), 1000);
-            }
-
-            // ===== 花蕊绽放 (消除恰好3个) =====
-            function showFlowerBloom(x, y) {
-                const rect = canvas.getBoundingClientRect();
-                const containerRect = gameContainer.getBoundingClientRect();
-                const cx = rect.left - containerRect.left + x + 20;
-                const cy = rect.top - containerRect.top + y + 20;
-
-                // 花瓣 — 粉红色系
-                const petalColors = ['#ff69b4', '#ff85c0', '#ffb6c1', '#ff1493', '#ff6eb4', '#ff99cc', '#ff4081', '#f06292'];
-                for (let i = 0; i < 12; i++) {
-                    const petal = document.createElement('div');
-                    petal.className = 'flower-petal';
-                    const angle = (Math.PI * 2 * i) / 12;
-                    const dist = 50 + Math.random() * 40;
-                    petal.style.cssText = `
-                        left: ${cx}px;
-                        top: ${cy}px;
-                        width: 20px;
-                        height: 20px;
-                        background: ${petalColors[i % petalColors.length]};
-                        --px: ${Math.cos(angle) * dist}px;
-                        --py: ${Math.sin(angle) * dist}px;
-                        --pr: ${(Math.random() - 0.5) * 120}deg;
-                    `;
-                    gameContainer.appendChild(petal);
-                    setTimeout(() => petal.remove(), 1500);
-                }
-
-                // 花蕊
-                const stamen = document.createElement('div');
-                stamen.className = 'stamen';
-                stamen.style.cssText = `
-                    left: ${cx - 12}px;
-                    top: ${cy - 12}px;
-                    width: 24px;
-                    height: 24px;
-                `;
-                gameContainer.appendChild(stamen);
-                setTimeout(() => stamen.remove(), 1500);
-            }
-
-            // ===== 赞美文字 =====
-            function showPraise(text, color) {
-                const containerRect = gameContainer.getBoundingClientRect();
-                const cx = containerRect.width / 2;
-                const cy = containerRect.height * 0.45;
-                const el = document.createElement('div');
-                el.className = 'praise-text';
-                el.textContent = text;
-                el.style.cssText = `
-                    left: ${cx}px;
-                    top: ${cy}px;
-                    transform: translate(-50%, 0);
-                    color: ${color};
-                    font-size: 36px;
-                `;
-                gameContainer.appendChild(el);
-                setTimeout(() => el.remove(), 2500);
-            }
-
-            // ===== CSS构建皮卡丘 =====
-            function buildPikachu(targetSize) {
-                // 返回一个纯CSS绘制、持续动画的皮卡丘DOM
-                const s = targetSize;
-                const container = document.createElement('div');
-                container.style.cssText = `position:relative;width:${s}px;height:${s}px;pointer-events:none;animation:pikaBounce 0.6s ease-in-out infinite alternate;`;
-
-                // 样式已在上方CSS中定义
-
-                // --- 闪电尾巴 ---
-                const tailW = s * 0.15, tailH = s * 0.28;
-                const tail = document.createElement('div');
-                tail.style.cssText = `position:absolute;width:${tailW}px;height:${tailH}px;bottom:${s*0.1}px;right:${-s*0.02}px;animation:tailWag 0.8s ease-in-out infinite alternate;transform-origin:bottom left;z-index:-2;`;
-                tail.innerHTML = `<svg width="${tailW}" height="${tailH}" viewBox="0 0 30 65"><polygon points="15,0 30,20 20,20 28,55 10,35 18,35 2,10 15,10" fill="#FDD835" stroke="#DAA520" stroke-width="1"/><polygon points="15,2 27,19 19,19 25,50 11,35 17,35 4,12 14,12" fill="#C8A96E"/></svg>`;
-                container.appendChild(tail);
-
-                // --- 后脚 ---
-                const footW = s * 0.12, footH = s * 0.065, footY = s * 0.78;
-                [s * 0.28, s * 0.6].forEach((lx) => {
-                    const foot = document.createElement('div');
-                    foot.style.cssText = `position:absolute;width:${footW}px;height:${footH}px;left:${lx}px;top:${footY}px;background:#F0C300;border-radius:45% 45% 50% 50%;`;
-                    container.appendChild(foot);
-                });
-
-                // --- 身体 ---
-                const body = document.createElement('div');
-                body.style.cssText = `position:absolute;width:${s*0.55}px;height:${s*0.4}px;left:${s*0.225}px;top:${s*0.45}px;background:#FDD835;border-radius:50%;box-shadow:inset -4px -4px 8px rgba(0,0,0,0.1),inset 4px 4px 8px rgba(255,255,255,0.3);`;
-                container.appendChild(body);
-
-                // --- 前爪 ---
-                const armSize = s * 0.11, armY = s * 0.52;
-                [s * 0.22, s * 0.67].forEach((lx, i) => {
-                    const arm = document.createElement('div');
-                    arm.style.cssText = `position:absolute;width:${armSize}px;height:${armSize}px;left:${lx}px;top:${armY}px;background:#FDD835;border-radius:50%;animation:armWave 1.2s ease-in-out infinite alternate;animation-delay:${i*0.3}s;`;
-                    container.appendChild(arm);
-                });
-
-                // --- 头 ---
-                const headSize = s * 0.62;
-                const head = document.createElement('div');
-                head.style.cssText = `position:absolute;width:${headSize}px;height:${headSize*0.85}px;left:${s*0.19}px;top:${s*0.06}px;background:#FDD835;border-radius:49% 49% 51% 51%;box-shadow:inset -3px -3px 6px rgba(0,0,0,0.08),inset 3px 3px 6px rgba(255,255,255,0.3);`;
-                container.appendChild(head);
-
-                // --- 耳朵 ---
-                const earW = s * 0.14, earH = s * 0.35;
-                [{l:s*0.23, d:0}, {l:s*0.63, d:0.4}].forEach(({l, d}) => {
-                    const ear = document.createElement('div');
-                    ear.style.cssText = `position:absolute;width:${earW}px;height:${earH}px;left:${l}px;top:${-s*0.15}px;background:#FDD835;border-radius:50% 50% 20% 20%;animation:earWiggle 2.5s ease-in-out infinite;animation-delay:${d}s;z-index:-1;`;
-                    const tip = document.createElement('div');
-                    tip.style.cssText = `position:absolute;top:0;left:10%;width:80%;height:35%;background:#1a1a1a;border-radius:50% 50% 15% 15%;`;
-                    ear.appendChild(tip);
-                    container.appendChild(ear);
-                });
-
-                // --- 眼睛 ---
-                const eyeSize = s * 0.085;
-                [s*0.31, s*0.59].forEach((lx) => {
-                    const eye = document.createElement('div');
-                    eye.style.cssText = `position:absolute;width:${eyeSize}px;height:${eyeSize*1.15}px;left:${lx}px;top:${s*0.2}px;background:#1a1a1a;border-radius:50%;animation:eyeBlink 4s ease-in-out infinite;`;
-                    const hl = document.createElement('div');
-                    hl.style.cssText = `position:absolute;width:35%;height:35%;background:#fff;border-radius:50%;top:15%;left:25%;`;
-                    eye.appendChild(hl);
-                    container.appendChild(eye);
-                });
-
-                // --- 红脸颊 (脉动发光) ---
-                const cheekSize = s * 0.08;
-                [s*0.24, s*0.66].forEach((lx, i) => {
-                    const cheek = document.createElement('div');
-                    cheek.style.cssText = `position:absolute;width:${cheekSize}px;height:${cheekSize*0.7}px;left:${lx}px;top:${s*0.32}px;background:#FF4444;border-radius:50%;animation:cheekGlow 1.5s ease-in-out infinite alternate;animation-delay:${i*0.5}s;`;
-                    container.appendChild(cheek);
-                });
-
-                // --- 鼻子 ---
-                const nose = document.createElement('div');
-                nose.style.cssText = `position:absolute;width:${s*0.025}px;height:${s*0.025}px;left:${s*0.485}px;top:${s*0.28}px;background:#1a1a1a;border-radius:50%;`;
-                container.appendChild(nose);
-
-                // --- 嘴 (W型微笑，微微动) ---
-                const mouth = document.createElement('div');
-                const mw = s * 0.16, mh = s * 0.08;
-                mouth.style.cssText = `position:absolute;left:${s*0.42}px;top:${s*0.29}px;width:${mw}px;height:${mh}px;`;
-                mouth.innerHTML = `<svg width="${mw}" height="${mh}" viewBox="0 0 40 20"><path d="M5,2 Q12,14 20,4 Q28,14 35,2" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
-                container.appendChild(mouth);
-
-                return container;
-            }
-
-            function showPikachuFly() {
-                const size = 80;
-                const containerRect = gameContainer.getBoundingClientRect();
-                const cy = containerRect.height * 0.35;
-                const el = document.createElement('div');
-                el.className = 'pikachu-fly';
-                el.style.cssText = `
-                    top: ${cy}px;
-                    left: -100px;
-                    width: ${size}px;
-                    height: ${size}px;
-                `;
-
-                // CSS皮卡丘
-                const pikaEl = buildPikachu(size);
-                el.appendChild(pikaEl);
-                gameContainer.appendChild(el);
-                setTimeout(() => el.remove(), 3000);
-
-                // 爱心飘出
-                for (let i = 0; i < 8; i++) {
-                    setTimeout(() => {
-                        const heart = document.createElement('div');
-                        heart.className = 'kiss-heart';
-                        heart.textContent = ['❤️', '💕', '💖', '💗', '💘', '💝', '😘', '💋'][i];
-                        const hx = (Math.random() - 0.5) * 160;
-                        const hy = -(80 + Math.random() * 120);
-                        heart.style.cssText = `
-                            top: ${cy}px;
-                            left: ${containerRect.width * (0.3 + Math.random() * 0.4)}px;
-                            --hx: ${hx}px;
-                            --hy: ${hy}px;
-                        `;
-                        gameContainer.appendChild(heart);
-                        setTimeout(() => heart.remove(), 1500);
-                    }, 400 + i * 200);
-                }
-            }
-
-            // ===== 通关胜利 (消除7+) =====
-            function showVictory() {
-                if (victoryTriggered) return;
-                victoryTriggered = true;
-                gameRunning = false;
-                // 大皮卡丘 - CSS绘制
-                const bigPika = document.createElement('div');
-                bigPika.className = 'big-pikachu';
-                const bigSize = 200;
-                bigPika.style.width = bigSize + 'px';
-                bigPika.style.height = bigSize + 'px';
-
-                const pikaCss = buildPikachu(bigSize);
-                bigPika.appendChild(pikaCss);
-                gameContainer.appendChild(bigPika);
-                setTimeout(() => bigPika.remove(), 5000);
-
-                // 横幅
-                const banner = document.createElement('div');
-                banner.className = 'victory-banner';
-                banner.textContent = '🏆 傲崽牛逼！！！🏆';
-                gameContainer.appendChild(banner);
-                setTimeout(() => banner.remove(), 5000);
-
-                // 五彩纸屑
-                const colors = ['#ff1744', '#ffea00', '#00e676', '#2979ff', '#d500f9', '#ff6d00', '#00e5ff', '#ff4081'];
-                const containerRect = gameContainer.getBoundingClientRect();
-                for (let i = 0; i < 60; i++) {
-                    setTimeout(() => {
-                        const confetti = document.createElement('div');
-                        confetti.className = 'confetti';
-                        const size = 6 + Math.random() * 10;
-                        confetti.style.cssText = `
-                            left: ${Math.random() * containerRect.width}px;
-                            top: -20px;
-                            width: ${size}px;
-                            height: ${size * 1.5}px;
-                            background: ${colors[Math.floor(Math.random() * colors.length)]};
-                            border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
-                            animation-delay: ${Math.random() * 1}s;
-                            animation-duration: ${2 + Math.random() * 3}s;
-                        `;
-                        gameContainer.appendChild(confetti);
-                        setTimeout(() => confetti.remove(), 4000);
-                    }, i * 30);
-                }
-            }
-
-            function removeBubbles(bubbleSet) {
-                let removed = 0;
-                for (const key of bubbleSet) {
-                    const [col, row] = key.split(',').map(Number);
-                    const bubble = getBubbleAt(col, row);
-                    if (bubble) {
-                        const pos = { x: getGridX(col, row), y: getGridY(row) };
-                        createParticles(pos.x, pos.y, bubble.color);
-                        grid[row][col] = null;
-                        removed++;
-                    }
-                }
-                return removed;
-            }
-
-            function snapBubbleToGrid() {
-                let bestCol = -1;
-                let bestRow = -1;
-                let bestDist = Infinity;
-
-                for (let row = 0; row < ROWS; row++) {
-                    const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
-                    for (let col = 0; col < colsInRow; col++) {
-                        if (grid[row][col] && grid[row][col].active) continue;
-
-                        const gx = getGridX(col, row);
-                        const gy = getGridY(row);
-                        const dx = bubbleX - gx;
-                        const dy = bubbleY - gy;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-
-                        if (dist < BUBBLE_DIAMETER * 0.8 && dist < bestDist) {
-                            bestDist = dist;
-                            bestCol = col;
-                            bestRow = row;
-                        }
-                    }
-                }
-
-                if (bestRow >= 0) {
-                    grid[bestRow][bestCol] = createBubble(shooterBubble.color);
-
-                    // Find connected bubbles of same color
-                    const connected = findConnected(bestCol, bestRow, shooterBubble.color);
-
-                    let pointsEarned = 0;
-                    const matchCount = connected.size;
-
-                    if (matchCount >= 3) {
-                        const removed = removeBubbles(connected);
-                        pointsEarned = removed * 10;
-                        comboCount++;
-
-                        const snapX = getGridX(bestCol, bestRow);
-                        const snapY = getGridY(bestRow);
-
-                        // ============ 傲崽专属特效 ============
-                        if (matchCount === 3) {
-                            // 刚好3个：粉红花瓣绽放 + "傲崽真棒"
-                            showFlowerBloom(snapX, snapY);
-                            showPraise('🌸 傲崽真棒 🌸', '#ff69b4');
-                        } else if (matchCount >= 4 && matchCount <= 6) {
-                            // 4-6个：皮卡丘飞过 + "傲崽，想亲亲你"
-                            showPikachuFly();
-                            showPraise('⚡ 傲崽，想亲亲你 💋', '#ffd700');
-                        } else if (matchCount >= 7) {
-                            // 7个以上：大皮卡丘 + 横幅通关
-                            showVictory();
-                            // 延迟弹窗，让玩家欣赏特效
-                            setTimeout(() => {
-                                endGame(true);
-                            }, 5000);
-                        }
-                        // ========================================
-
-                        // Find and remove floating bubbles
-                        const floating = findFloating();
-                        if (floating.length > 0) {
-                            for (const { col, row } of floating) {
-                                const b = getBubbleAt(col, row);
-                                if (b) {
-                                    createParticles(getGridX(col, row), getGridY(row), b.color);
-                                    grid[row][col] = null;
-                                }
-                            }
-                            pointsEarned += floating.length * 20;
-                            showCombo(
-                                getGridX(floating[0].col, floating[0].row),
-                                getGridY(floating[0].row) - 20,
-                                `🌟 掉落 +${floating.length * 20}!`
-                            );
-                        }
-                    } else {
-                        comboCount = 0;
-                    }
-
-                    score += pointsEarned;
-                    updateScore();
-                    checkGameOver();
-                }
-
-                return bestRow >= 0;
-            }
-
-            function checkGameOver() {
-                // Check if any bubble has reached the bottom rows
-                for (let row = ROWS - 3; row < ROWS; row++) {
-                    const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
-                    for (let col = 0; col < colsInRow; col++) {
-                        if (grid[row][col] && grid[row][col].active) {
-                            endGame(false);
-                            return;
-                        }
-                    }
-                }
-
-                // Check win condition - no bubbles left
-                let hasBubbles = false;
-                for (let row = 0; row < ROWS; row++) {
-                    const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
-                    for (let col = 0; col < colsInRow; col++) {
-                        if (grid[row][col] && grid[row][col].active) {
-                            hasBubbles = true;
-                            break;
-                        }
-                    }
-                    if (hasBubbles) break;
-                }
-                if (!hasBubbles) {
-                    endGame(true);
-                }
-            }
-
-            function endGame(won) {
-                gameRunning = false;
-                gameOverTitle.textContent = won ? '🎉 恭喜通关!' : '💀 游戏结束';
-                gameOverTitle.style.color = won ? '#6bcb77' : '#ff6b6b';
-                gameOverScore.textContent = `最终得分: ${score}`;
-                gameOverOverlay.classList.add('active');
-            }
-
-            function updateScore() {
-                scoreElement.textContent = score;
-            }
-
-            function shootBubble(targetX, targetY) {
-                if (isShooting || !gameRunning || victoryTriggered) return;
-
-                const dx = targetX - SHOOTER_X;
-                const dy = targetY - SHOOTER_Y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 1) return;
-
-                const speed = 12;
-                bubbleVX = (dx / dist) * speed;
-                bubbleVY = (dy / dist) * speed;
-                bubbleX = SHOOTER_X;
-                bubbleY = SHOOTER_Y;
-                isShooting = true;
-            }
-
-            function updateBubble() {
-                if (!isShooting) return;
-
-                bubbleX += bubbleVX;
-                bubbleY += bubbleVY;
-
-                // Wall bouncing
-                if (bubbleX - BUBBLE_RADIUS <= 0) {
-                    bubbleX = BUBBLE_RADIUS;
-                    bubbleVX = Math.abs(bubbleVX);
-                }
-                if (bubbleX + BUBBLE_RADIUS >= canvas.width) {
-                    bubbleX = canvas.width - BUBBLE_RADIUS;
-                    bubbleVX = -Math.abs(bubbleVX);
-                }
-
-                // Hit ceiling or other bubbles
-                if (bubbleY - BUBBLE_RADIUS <= GRID_OFFSET_Y) {
-                    bubbleY = GRID_OFFSET_Y + BUBBLE_RADIUS;
-                    const snapped = snapBubbleToGrid();
-                    if (!snapped) {
-                        // Place at nearest valid position in top row
-                        placeBubbleAtTop();
-                    }
-                    isShooting = false;
-                    nextTurn();
-                    return;
-                }
-
-                // Check collision with existing bubbles
-                for (let row = 0; row < ROWS; row++) {
-                    const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
-                    for (let col = 0; col < colsInRow; col++) {
-                        if (grid[row][col] && grid[row][col].active) {
-                            const gx = getGridX(col, row);
-                            const gy = getGridY(row);
-                            const dx = bubbleX - gx;
-                            const dy = bubbleY - gy;
-                            const dist = Math.sqrt(dx * dx + dy * dy);
-
-                            if (dist < BUBBLE_DIAMETER) {
-                                // Place bubble adjacent to the hit bubble
-                                const snapped = snapBubbleToGrid();
-                                if (!snapped) {
-                                    placeBubbleAtTop();
-                                }
-                                isShooting = false;
-                                nextTurn();
-                                return;
-                            }
-                        }
-                    }
-                }
-
-                // Fell off bottom
-                if (bubbleY - BUBBLE_RADIUS > canvas.height) {
-                    isShooting = false;
-                    nextTurn();
-                }
-            }
-
-            function placeBubbleAtTop() {
-                // Find the closest valid grid position near where it hit
-                let bestCol = 0;
-                let bestRow = 0;
-                let bestDist = Infinity;
-
-                for (let row = 0; row < ROWS; row++) {
-                    const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
-                    for (let col = 0; col < colsInRow; col++) {
-                        if (!grid[row][col] || !grid[row][col].active) {
-                            const gx = getGridX(col, row);
-                            const gy = getGridY(row);
-                            const dx = bubbleX - gx;
-                            const dy = bubbleY - gy;
-                            const dist = Math.sqrt(dx * dx + dy * dy);
-                            if (dist < bestDist) {
-                                bestDist = dist;
-                                bestCol = col;
-                                bestRow = row;
-                            }
-                        }
-                    }
-                }
-
-                grid[bestRow][bestCol] = createBubble(shooterBubble.color);
-                const connected = findConnected(bestCol, bestRow, shooterBubble.color);
-                if (connected.size >= 3) {
-                    const removed = removeBubbles(connected);
-                    score += removed * 10;
-                    updateScore();
-                }
-                checkGameOver();
-            }
-
-            function nextTurn() {
-                shooterBubble = nextBubble;
-                nextBubble = createBubble(randomColor());
-                updateNextBubbleDisplay();
-                comboCount = Math.max(0, comboCount - 1);
-            }
-
-            function updateNextBubbleDisplay() {
-                if (!nextBubble) return;
-                nextBubbleDiv.innerHTML = `
-                    <svg width="36" height="36">
-                        <circle cx="18" cy="18" r="16" fill="${nextBubble.color}" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
-                        <circle cx="12" cy="11" r="5" fill="rgba(255,255,255,0.25)"/>
-                    </svg>
-                `;
-            }
-
-            function drawShooterBubble() {
-                if (!shooterBubble) return;
-                const x = isShooting ? bubbleX : SHOOTER_X;
-                const y = isShooting ? bubbleY : SHOOTER_Y;
-                drawBubble(x, y, shooterBubble.color, true);
-            }
-
-            function simulateShot(angle) {
-                // Returns {x, y, hit} — where the bubble would land if shot at this angle
-                const speed = 12;
-                let sx = SHOOTER_X;
-                let sy = SHOOTER_Y;
-                let vx = Math.cos(angle) * speed;
-                let vy = Math.sin(angle) * speed;
-
-                for (let step = 0; step < 200; step++) {
-                    sx += vx;
-                    sy += vy;
-
-                    // Wall bounce
-                    if (sx - BUBBLE_RADIUS <= 0) {
-                        sx = BUBBLE_RADIUS;
-                        vx = Math.abs(vx);
-                    } else if (sx + BUBBLE_RADIUS >= canvas.width) {
-                        sx = canvas.width - BUBBLE_RADIUS;
-                        vx = -Math.abs(vx);
-                    }
-
-                    // Hit ceiling
-                    if (sy - BUBBLE_RADIUS <= GRID_OFFSET_Y) {
-                        return { x: sx, y: GRID_OFFSET_Y + BUBBLE_RADIUS, hit: 'ceiling' };
-                    }
-
-                    // Check collision with existing bubbles
-                    for (let row = 0; row < ROWS; row++) {
-                        const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
-                        for (let col = 0; col < colsInRow; col++) {
-                            if (grid[row][col] && grid[row][col].active) {
-                                const gx = getGridX(col, row);
-                                const gy = getGridY(row);
-                                const dx = sx - gx;
-                                const dy = sy - gy;
-                                const dist = Math.sqrt(dx * dx + dy * dy);
-                                if (dist < BUBBLE_DIAMETER) {
-                                    // Snap to nearest grid position adjacent to this bubble
-                                    let bestCol = col, bestRow = row;
-                                    let bestDist = Infinity;
-                                    for (let nr = Math.max(0, row - 1); nr <= Math.min(ROWS - 1, row + 1); nr++) {
-                                        const ncols = (nr % 2 === 0) ? COLS : COLS - 1;
-                                        for (let nc = Math.max(0, col - 1); nc <= Math.min(ncols - 1, col + 1); nc++) {
-                                            if (isPositionValid(nc, nr) && (!grid[nr][nc] || !grid[nr][nc].active)) {
-                                                const nx = getGridX(nc, nr);
-                                                const ny = getGridY(nr);
-                                                const nd = Math.hypot(sx - nx, sy - ny);
-                                                if (nd < bestDist && nd < BUBBLE_DIAMETER * 1.5) {
-                                                    bestDist = nd;
-                                                    bestCol = nc;
-                                                    bestRow = nr;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if (bestDist < Infinity) {
-                                        return { x: getGridX(bestCol, bestRow), y: getGridY(bestRow), hit: 'bubble' };
-                                    }
-                                    return { x: sx, y: sy, hit: 'bubble' };
+        }
+    }
+    grid[bestRow][bestCol] = createBubble(shooterBubble.color);
+    const connected = findConnected(bestCol, bestRow, shooterBubble.color);
+    if (connected.size >= 3) { score += removeBubbles(connected) * 10; updateScore(); }
+    checkGameOver();
+}
+
+function nextTurn() {
+    shooterBubble = nextBubble;
+    nextBubble = createBubble(randomColor());
+    updateNextBubbleDisplay();
+    comboCount = Math.max(0, comboCount - 1);
+}
+
+function updateNextBubbleDisplay() {
+    if (!nextBubble) return;
+    nextBubbleDiv.innerHTML = `<svg width="36" height="36"><circle cx="18" cy="18" r="16" fill="${nextBubble.color}" stroke="rgba(255,255,255,0.3)" stroke-width="2"/><circle cx="12" cy="11" r="5" fill="rgba(255,255,255,0.25)"/></svg>`;
+}
+
+function simulateShot(angle) {
+    const speed = 12;
+    let sx = SHOOTER_X, sy = SHOOTER_Y, vx = Math.cos(angle) * speed, vy = Math.sin(angle) * speed;
+    for (let step = 0; step < 200; step++) {
+        sx += vx; sy += vy;
+        if (sx - BUBBLE_RADIUS <= 0) { sx = BUBBLE_RADIUS; vx = Math.abs(vx); }
+        else if (sx + BUBBLE_RADIUS >= canvas.width) { sx = canvas.width - BUBBLE_RADIUS; vx = -Math.abs(vx); }
+        if (sy - BUBBLE_RADIUS <= GRID_OFFSET_Y) return { x: sx, y: GRID_OFFSET_Y + BUBBLE_RADIUS, hit: 'ceiling' };
+        for (let row = 0; row < ROWS; row++) {
+            const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
+            for (let col = 0; col < colsInRow; col++) {
+                if (grid[row][col] && grid[row][col].active) {
+                    const gx = getGridX(col, row), gy = getGridY(row);
+                    if (Math.hypot(sx - gx, sy - gy) < BUBBLE_DIAMETER) {
+                        let bc = col, br = row, bd = Infinity;
+                        for (let nr = Math.max(0, row - 1); nr <= Math.min(ROWS - 1, row + 1); nr++) {
+                            const ncols = (nr % 2 === 0) ? COLS : COLS - 1;
+                            for (let nc = Math.max(0, col - 1); nc <= Math.min(ncols - 1, col + 1); nc++) {
+                                if (isPositionValid(nc, nr) && (!grid[nr][nc] || !grid[nr][nc].active)) {
+                                    const nd = Math.hypot(sx - getGridX(nc, nr), sy - getGridY(nr));
+                                    if (nd < bd && nd < BUBBLE_DIAMETER * 1.5) { bd = nd; bc = nc; br = nr; }
                                 }
                             }
                         }
-                    }
-                }
-                // Fell off screen
-                return { x: sx, y: Math.min(sy, canvas.height), hit: 'miss' };
-            }
-
-            function drawAimLine() {
-                if (isShooting || !gameRunning || !shooterBubble) return;
-
-                const dx = mouseX - SHOOTER_X;
-                const dy = mouseY - SHOOTER_Y;
-                if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
-
-                const angle = Math.atan2(dy, dx);
-                const target = simulateShot(angle);
-
-                // Draw solid aim line from shooter to target
-                ctx.save();
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([6, 3]);
-                ctx.beginPath();
-                ctx.moveTo(SHOOTER_X, SHOOTER_Y - BUBBLE_RADIUS);
-                ctx.lineTo(target.x, target.y);
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                // Draw bright landing dot at predicted position
-                const dotColor = shooterBubble ? shooterBubble.color : COLORS[0];
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                ctx.beginPath();
-                ctx.arc(target.x, target.y, 4, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = dotColor;
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                // Draw small matching-color indicator
-                if (shooterBubble) {
-                    ctx.fillStyle = shooterBubble.color;
-                    ctx.beginPath();
-                    ctx.arc(target.x, target.y, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-
-                ctx.restore();
-            }
-
-            function drawBubble(x, y, color, highlight = false) {
-                ctx.save();
-
-                // Shadow
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-                ctx.shadowBlur = 6;
-                ctx.shadowOffsetX = 2;
-                ctx.shadowOffsetY = 2;
-
-                // Main bubble
-                const gradient = ctx.createRadialGradient(
-                    x - BUBBLE_RADIUS * 0.3, y - BUBBLE_RADIUS * 0.3, BUBBLE_RADIUS * 0.1,
-                    x, y, BUBBLE_RADIUS
-                );
-                gradient.addColorStop(0, lightenColor(color, 40));
-                gradient.addColorStop(0.7, color);
-                gradient.addColorStop(1, darkenColor(color, 30));
-
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(x, y, BUBBLE_RADIUS - 1, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.shadowColor = 'transparent';
-
-                // Border
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-
-                // Highlight
-                if (highlight) {
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-                    ctx.beginPath();
-                    ctx.arc(x - BUBBLE_RADIUS * 0.35, y - BUBBLE_RADIUS * 0.35,
-                        BUBBLE_RADIUS * 0.35, 0, Math.PI * 2);
-                    ctx.fill();
-                } else {
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-                    ctx.beginPath();
-                    ctx.arc(x - BUBBLE_RADIUS * 0.25, y - BUBBLE_RADIUS * 0.3,
-                        BUBBLE_RADIUS * 0.3, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-
-                ctx.restore();
-            }
-
-            function lightenColor(hex, percent) {
-                const num = parseInt(hex.replace('#', ''), 16);
-                const amt = Math.round(2.55 * percent);
-                const R = Math.min(255, (num >> 16) + amt);
-                const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
-                const B = Math.min(255, (num & 0x0000FF) + amt);
-                return `rgb(${R}, ${G}, ${B})`;
-            }
-
-            function darkenColor(hex, percent) {
-                const num = parseInt(hex.replace('#', ''), 16);
-                const amt = Math.round(2.55 * percent);
-                const R = Math.max(0, (num >> 16) - amt);
-                const G = Math.max(0, ((num >> 8) & 0x00FF) - amt);
-                const B = Math.max(0, (num & 0x0000FF) - amt);
-                return `rgb(${R}, ${G}, ${B})`;
-            }
-
-            function drawGrid() {
-                for (let row = 0; row < ROWS; row++) {
-                    const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
-                    for (let col = 0; col < colsInRow; col++) {
-                        const bubble = grid[row][col];
-                        if (bubble && bubble.active) {
-                            const x = getGridX(col, row);
-                            const y = getGridY(row);
-                            drawBubble(x, y, bubble.color);
-                        }
+                        if (bd < Infinity) return { x: getGridX(bc, br), y: getGridY(br), hit: 'bubble' };
+                        return { x: sx, y: sy, hit: 'bubble' };
                     }
                 }
             }
+        }
+    }
+    return { x: sx, y: Math.min(sy, canvas.height), hit: 'miss' };
+}
 
-            function drawBackground() {
-                // Ceiling line
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(GRID_OFFSET_X - 5, GRID_OFFSET_Y + BUBBLE_RADIUS + 10);
-                ctx.lineTo(canvas.width - GRID_OFFSET_X + 5, GRID_OFFSET_Y + BUBBLE_RADIUS + 10);
-                ctx.stroke();
+function drawAimLine() {
+    if (isShooting || !gameRunning || !shooterBubble) return;
+    const dx = mouseX - SHOOTER_X, dy = mouseY - SHOOTER_Y;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+    const target = simulateShot(Math.atan2(dy, dx));
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 3]);
+    ctx.beginPath();
+    ctx.moveTo(SHOOTER_X, SHOOTER_Y - BUBBLE_RADIUS);
+    ctx.lineTo(target.x, target.y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.beginPath(); ctx.arc(target.x, target.y, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = shooterBubble.color; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = shooterBubble.color;
+    ctx.beginPath(); ctx.arc(target.x, target.y, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+}
 
-                // Shooter platform
-                const platY = SHOOTER_Y + BUBBLE_RADIUS + 5;
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-                ctx.beginPath();
-                ctx.ellipse(SHOOTER_X, platY, BUBBLE_RADIUS * 2.5, BUBBLE_RADIUS * 0.6, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            }
+function lightenColor(hex, p) {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const amt = Math.round(2.55 * p);
+    return `rgb(${Math.min(255, (num>>16)+amt)},${Math.min(255, ((num>>8)&0x00FF)+amt)},${Math.min(255, (num&0x0000FF)+amt)})`;
+}
+function darkenColor(hex, p) {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const amt = Math.round(2.55 * p);
+    return `rgb(${Math.max(0, (num>>16)-amt)},${Math.max(0, ((num>>8)&0x00FF)-amt)},${Math.max(0, (num&0x0000FF)-amt)})`;
+}
 
-            function draw() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+function drawBubble(x, y, color, hl) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 6; ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 2;
+    const g = ctx.createRadialGradient(x - BUBBLE_RADIUS*0.3, y - BUBBLE_RADIUS*0.3, BUBBLE_RADIUS*0.1, x, y, BUBBLE_RADIUS);
+    g.addColorStop(0, lightenColor(color, 40));
+    g.addColorStop(0.7, color);
+    g.addColorStop(1, darkenColor(color, 30));
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, BUBBLE_RADIUS - 1, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,' + (hl ? '0.2' : '0.15') + ')';
+    ctx.beginPath();
+    ctx.arc(x - BUBBLE_RADIUS*(hl?0.35:0.25), y - BUBBLE_RADIUS*(hl?0.35:0.3), BUBBLE_RADIUS*(hl?0.35:0.3), 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+}
 
-                // Background
-                ctx.fillStyle = 'rgba(13, 27, 42, 0.5)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+function drawShooterBubble() {
+    if (!shooterBubble) return;
+    const x = isShooting ? bubbleX : SHOOTER_X, y = isShooting ? bubbleY : SHOOTER_Y;
+    drawBubble(x, y, shooterBubble.color, true);
+}
 
-                drawBackground();
-                drawGrid();
-                drawAimLine();
-                drawShooterBubble();
-            }
+function drawGrid() {
+    for (let row = 0; row < ROWS; row++) {
+        const colsInRow = (row % 2 === 0) ? COLS : COLS - 1;
+        for (let col = 0; col < colsInRow; col++) {
+            if (grid[row][col] && grid[row][col].active) drawBubble(getGridX(col, row), getGridY(row), grid[row][col].color);
+        }
+    }
+}
 
-            function gameLoop() {
-                updateBubble();
-                draw();
-                animationId = requestAnimationFrame(gameLoop);
-            }
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(13,27,42,0.5)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Ceiling
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(GRID_OFFSET_X - 5, GRID_OFFSET_Y + BUBBLE_RADIUS + 10);
+    ctx.lineTo(canvas.width - GRID_OFFSET_X + 5, GRID_OFFSET_Y + BUBBLE_RADIUS + 10);
+    ctx.stroke();
+    // Platform
+    const py = SHOOTER_Y + BUBBLE_RADIUS + 5;
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.beginPath();
+    ctx.ellipse(SHOOTER_X, py, BUBBLE_RADIUS * 2.5, BUBBLE_RADIUS * 0.6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1; ctx.stroke();
 
-            function resetGame() {
-                score = 0;
-                comboCount = 0;
-                isShooting = false;
-                gameRunning = true;
-                victoryTriggered = false;
-                updateScore();
-                initGrid();
-                shooterBubble = createBubble(randomColor());
-                nextBubble = createBubble(randomColor());
-                updateNextBubbleDisplay();
-                bubbleX = SHOOTER_X;
-                bubbleY = SHOOTER_Y;
-                gameOverOverlay.classList.remove('active');
-            }
+    drawGrid();
+    drawAimLine();
+    drawShooterBubble();
+}
 
-            // Event handlers
-            canvas.addEventListener('mousemove', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                mouseX = e.clientX - rect.left;
-                mouseY = e.clientY - rect.top;
-            });
+function gameLoop() { updateBubble(); draw(); animationId = requestAnimationFrame(gameLoop); }
 
-            canvas.addEventListener('click', (e) => {
-                if (!gameRunning || isShooting || victoryTriggered) return;
-                const rect = canvas.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                const clickY = e.clientY - rect.top;
+function resetGame() {
+    score = 0; comboCount = 0; isShooting = false; gameRunning = true; victoryTriggered = false;
+    updateScore();
+    initGrid();
+    shooterBubble = createBubble(randomColor());
+    nextBubble = createBubble(randomColor());
+    updateNextBubbleDisplay();
+    bubbleX = SHOOTER_X; bubbleY = SHOOTER_Y;
+    gameOverOverlay.classList.remove('active');
+}
 
-                // Only shoot upward
-                if (clickY < SHOOTER_Y) {
-                    shootBubble(clickX, clickY);
-                }
-            });
+canvas.addEventListener('mousemove', e => {
+    const r = canvas.getBoundingClientRect();
+    mouseX = e.clientX - r.left;
+    mouseY = e.clientY - r.top;
+});
 
-            // Touch support
-            canvas.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                const rect = canvas.getBoundingClientRect();
-                mouseX = e.touches[0].clientX - rect.left;
-                mouseY = e.touches[0].clientY - rect.top;
-            }, { passive: false });
+canvas.addEventListener('click', e => {
+    if (!gameRunning || isShooting || victoryTriggered) return;
+    const r = canvas.getBoundingClientRect();
+    const cx = e.clientX - r.left, cy = e.clientY - r.top;
+    if (cy < SHOOTER_Y) shootBubble(cx, cy);
+});
 
-            canvas.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                if (!gameRunning || isShooting || victoryTriggered) return;
-                const rect = canvas.getBoundingClientRect();
-                const touchY = e.changedTouches[0].clientY - rect.top;
+canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const r = canvas.getBoundingClientRect();
+    mouseX = e.touches[0].clientX - r.left;
+    mouseY = e.touches[0].clientY - r.top;
+}, { passive: false });
 
-                if (touchY < SHOOTER_Y) {
-                    shootBubble(mouseX, touchY);
-                }
-            });
+canvas.addEventListener('touchend', e => {
+    e.preventDefault();
+    if (!gameRunning || isShooting || victoryTriggered) return;
+    const r = canvas.getBoundingClientRect();
+    const ty = e.changedTouches[0].clientY - r.top;
+    if (ty < SHOOTER_Y) shootBubble(mouseX, ty);
+});
 
-            document.getElementById('restartBtn').addEventListener('click', resetGame);
-            document.getElementById('playAgainBtn').addEventListener('click', resetGame);
+document.getElementById('restartBtn').addEventListener('click', resetGame);
+document.getElementById('playAgainBtn').addEventListener('click', resetGame);
 
-            // Initialize and start
-            resetGame();
-            gameLoop();
-        })();
-    </script>
+resetGame();
+gameLoop();
+})();
+</script>
 </body>
 </html>
