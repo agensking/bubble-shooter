@@ -267,11 +267,10 @@
             position: absolute;
             pointer-events: none;
             z-index: 200;
-            width: 80px;
-            height: 80px;
-            background: url('pikachu.png') center/contain no-repeat;
             animation: pikachuAcross 3s ease-in-out forwards;
-            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+        }
+        .pikachu-fly canvas {
+            display: block;
         }
         @keyframes pikachuAcross {
             0% {
@@ -328,12 +327,12 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 300;
-            width: 180px;
-            height: 180px;
-            background: url('pikachu.png') center/contain no-repeat;
             animation: pikachuVictory 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1)) drop-shadow(0 0 80px rgba(255, 200, 0, 0.6));
             pointer-events: none;
+        }
+        .big-pikachu canvas {
+            display: block;
         }
         @keyframes pikachuVictory {
             0% {
@@ -709,8 +708,154 @@
                 setTimeout(() => el.remove(), 2500);
             }
 
-            // ===== 皮卡丘飞过 (消除4-6个) =====
+            // ===== Canvas绘制皮卡丘 =====
+            function drawPikachu(canvas, size) {
+                const ctx = canvas.getContext('2d');
+                const s = size; // 总边长
+                const cx = s / 2;
+                const cy = s / 2;
+                ctx.clearRect(0, 0, s, s);
+
+                // === 比例尺 ===
+                const sc = s / 200; // 基于200px设计
+
+                // --- 闪电尾巴 ---
+                ctx.save();
+                ctx.translate(cx + 40 * sc, cy + 55 * sc);
+                ctx.rotate(-0.5);
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(25 * sc, -15 * sc);
+                ctx.lineTo(8 * sc, -5 * sc);
+                ctx.lineTo(20 * sc, 10 * sc);
+                ctx.lineTo(0, 10 * sc);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = '#4A2800';
+                ctx.beginPath();
+                ctx.moveTo(2 * sc, 0);
+                ctx.lineTo(22 * sc, -12 * sc);
+                ctx.lineTo(7 * sc, -4 * sc);
+                ctx.lineTo(17 * sc, 8 * sc);
+                ctx.lineTo(2 * sc, 8 * sc);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+
+                // --- 身体 (椭圆形) ---
+                ctx.fillStyle = '#FFD700';
+                ctx.strokeStyle = '#DAA520';
+                ctx.lineWidth = 2 * sc;
+                ctx.beginPath();
+                ctx.ellipse(cx, cy + 20 * sc, 38 * sc, 50 * sc, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // --- 头 (椭圆形) ---
+                ctx.fillStyle = '#FFE033';
+                ctx.beginPath();
+                ctx.ellipse(cx, cy - 8 * sc, 45 * sc, 38 * sc, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // --- 左耳 ---
+                ctx.fillStyle = '#FFE033';
+                ctx.beginPath();
+                ctx.ellipse(cx - 30 * sc, cy - 52 * sc, 12 * sc, 22 * sc, -0.3, 0, Math.PI * 2);
+                ctx.fill();
+                // 左耳黑色尖端
+                ctx.fillStyle = '#222';
+                ctx.beginPath();
+                ctx.ellipse(cx - 30 * sc, cy - 65 * sc, 7 * sc, 10 * sc, -0.3, 0, Math.PI * 2);
+                ctx.fill();
+
+                // --- 右耳 ---
+                ctx.fillStyle = '#FFE033';
+                ctx.beginPath();
+                ctx.ellipse(cx + 30 * sc, cy - 52 * sc, 12 * sc, 22 * sc, 0.3, 0, Math.PI * 2);
+                ctx.fill();
+                // 右耳黑色尖端
+                ctx.fillStyle = '#222';
+                ctx.beginPath();
+                ctx.ellipse(cx + 30 * sc, cy - 65 * sc, 7 * sc, 10 * sc, 0.3, 0, Math.PI * 2);
+                ctx.fill();
+
+                // --- 眼睛 ---
+                // 眼睛白底
+                ctx.fillStyle = '#FFF';
+                ctx.beginPath();
+                ctx.ellipse(cx - 16 * sc, cy - 15 * sc, 9 * sc, 10 * sc, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(cx + 16 * sc, cy - 15 * sc, 9 * sc, 10 * sc, 0, 0, Math.PI * 2);
+                ctx.fill();
+                // 瞳孔
+                ctx.fillStyle = '#111';
+                ctx.beginPath();
+                ctx.ellipse(cx - 14 * sc, cy - 15 * sc, 5 * sc, 6 * sc, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(cx + 18 * sc, cy - 15 * sc, 5 * sc, 6 * sc, 0, 0, Math.PI * 2);
+                ctx.fill();
+                // 眼睛高光
+                ctx.fillStyle = '#FFF';
+                ctx.beginPath();
+                ctx.arc(cx - 17 * sc, cy - 19 * sc, 2.5 * sc, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(cx + 15 * sc, cy - 19 * sc, 2.5 * sc, 0, Math.PI * 2);
+                ctx.fill();
+
+                // --- 红脸颊 ---
+                ctx.fillStyle = 'rgba(255, 80, 60, 0.7)';
+                ctx.beginPath();
+                ctx.ellipse(cx - 26 * sc, cy - 2 * sc, 8 * sc, 5 * sc, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(cx + 26 * sc, cy - 2 * sc, 8 * sc, 5 * sc, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // --- 鼻子 ---
+                ctx.fillStyle = '#222';
+                ctx.beginPath();
+                ctx.ellipse(cx, cy - 6 * sc, 3 * sc, 2 * sc, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // --- 嘴 ---
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 1.5 * sc;
+                ctx.beginPath();
+                ctx.moveTo(cx - 8 * sc, cy);
+                ctx.quadraticCurveTo(cx, cy + 8 * sc, cx + 8 * sc, cy);
+                ctx.stroke();
+
+                // --- 前爪 ---
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.ellipse(cx - 14 * sc, cy + 38 * sc, 10 * sc, 8 * sc, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(cx + 14 * sc, cy + 38 * sc, 10 * sc, 8 * sc, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // --- 后脚 ---
+                ctx.fillStyle = '#FFC800';
+                ctx.beginPath();
+                ctx.ellipse(cx - 18 * sc, cy + 62 * sc, 14 * sc, 7 * sc, 0.1, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(cx + 18 * sc, cy + 62 * sc, 14 * sc, 7 * sc, -0.1, 0, Math.PI * 2);
+                ctx.fill();
+
+                // --- 背部棕色条纹 ---
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(cx - 3 * sc, cy + 10 * sc, 6 * sc, 12 * sc);
+                ctx.fillStyle = '#A0522D';
+                ctx.fillRect(cx - 4 * sc, cy + 14 * sc, 8 * sc, 3 * sc);
+                ctx.fillRect(cx - 4 * sc, cy + 20 * sc, 8 * sc, 3 * sc);
+            }
             function showPikachuFly() {
+                const size = 80;
                 const containerRect = gameContainer.getBoundingClientRect();
                 const cy = containerRect.height * 0.35;
                 const el = document.createElement('div');
@@ -718,7 +863,18 @@
                 el.style.cssText = `
                     top: ${cy}px;
                     left: -100px;
+                    width: ${size}px;
+                    height: ${size}px;
                 `;
+
+                // 创建小 canvas 画皮卡丘
+                const cvs = document.createElement('canvas');
+                cvs.width = size * 2;
+                cvs.height = size * 2;
+                cvs.style.width = size + 'px';
+                cvs.style.height = size + 'px';
+                drawPikachu(cvs, size * 2);
+                el.appendChild(cvs);
                 gameContainer.appendChild(el);
                 setTimeout(() => el.remove(), 3000);
 
@@ -750,6 +906,17 @@
                 // 大皮卡丘
                 const bigPika = document.createElement('div');
                 bigPika.className = 'big-pikachu';
+                const bigSize = 200;
+                bigPika.style.width = bigSize + 'px';
+                bigPika.style.height = bigSize + 'px';
+
+                const bigCvs = document.createElement('canvas');
+                bigCvs.width = bigSize * 2;
+                bigCvs.height = bigSize * 2;
+                bigCvs.style.width = bigSize + 'px';
+                bigCvs.style.height = bigSize + 'px';
+                drawPikachu(bigCvs, bigSize * 2);
+                bigPika.appendChild(bigCvs);
                 gameContainer.appendChild(bigPika);
                 setTimeout(() => bigPika.remove(), 5000);
 
